@@ -103,7 +103,7 @@ class handler(basicposterhandler):
                     elem = e
                     break
             if elem is None: browser.quit(); logging.warn('facebook post handle error 16'); return 0
-            content = addhashtag(queueitem['CONTENT'], queueitem['TAG'])
+            content = addhashtag(queueitem['CONTENT'], queueitem['TAG'], mode = 1)
             elem.send_keys(content+'\n\nRead more:\n'+queueitem['LINK'])
             try: elems = browser.find_elements_by_xpath('//button[./span[text()="Post"]]')
             except: browser.quit(); logging.warn('facebook post handle error 17'); return 0
@@ -136,7 +136,7 @@ class handler(basicposterhandler):
             elem.send_keys(Keys.ENTER)
             sleep(10)
             elem.clear()
-            content = addhashtag(queueitem['CONTENT'], queueitem['TAG'])
+            content = addhashtag(queueitem['CONTENT'], queueitem['TAG'], mode = 1)
             elem.send_keys(content)
             try: elems = browser.find_elements_by_xpath('//button[text()="Post"]')
             except: browser.quit(); logging.warn('facebook post handle error 22'); return 0
