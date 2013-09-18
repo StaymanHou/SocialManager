@@ -3,7 +3,7 @@ import Mydb
 import string
 import re
 
-def addhashtag(text, tag_string):
+def addhashtag(text, tag_string, mode=0):
     if tag_string is None or len(tag_string.strip())==0:
         return text
     tag_list = tag_string.split(',')
@@ -17,6 +17,8 @@ def addhashtag(text, tag_string):
                 try: replace_text = ''.join(tokens[i:i+j]).translate(None, string.punctuation)
                 except: continue
                 text = re.sub('(^| )%s'%re.escape(' '.join(tokens[i:i+j])), '\\1#%s'%replace_text, text)
+                if mode == 1:
+                    return text
     return text
 
 def ngrams(text, n):

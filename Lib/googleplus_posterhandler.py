@@ -142,7 +142,7 @@ class handler(basicposterhandler):
             sleep(10)
             try: elem = browser.find_element_by_xpath('//div[2][../div/text()="Share what\'s new..."]')
             except: browser.quit(); logging.warn('google+ post handle error 27'); return 0
-            content = addhashtag(queueitem['CONTENT'], queueitem['TAG'])
+            content = addhashtag(queueitem['CONTENT'], queueitem['TAG'], mode = 1)
             elem.send_keys(content)
         # common part
             # delete everything first

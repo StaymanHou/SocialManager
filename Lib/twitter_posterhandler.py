@@ -70,7 +70,7 @@ class handler(basicposterhandler):
                 extra_content = ''
             else:
                 extra_content = ' ' + queueitem['EXTRA_CONTENT'].strip()
-            tweet_content = addhashtag(queueitem['TITLE'], queueitem['TAG'])
+            tweet_content = addhashtag(queueitem['TITLE'], queueitem['TAG'], mode = 1)
             if len(tweet_content)>=(117-len(extra_content)):
                 tweet_content = tweet_content[:(113-len(extra_content))] + '... '
             url = 'https://twitter.com/i/tweet/create'
@@ -86,7 +86,7 @@ class handler(basicposterhandler):
                 extra_content = ''
             else:
                 extra_content = ' ' + queueitem['EXTRA_CONTENT'].strip()
-            tweet_content = addhashtag(queueitem['TITLE'], queueitem['TAG'])
+            tweet_content = addhashtag(queueitem['TITLE'], queueitem['TAG'], mode = 1)
             if (queueitem['IMAGE_FILE'] is None) or (queueitem['IMAGE_FILE']==''): logging.warn('No image file specified in a image type tweet.'); return 0
             if len(tweet_content)>=(93-len(extra_content)):
                 tweet_content = tweet_content[:(89-len(extra_content))] + '... '
