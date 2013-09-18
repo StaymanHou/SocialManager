@@ -84,7 +84,7 @@ class handler(basicposterhandler):
         try: elem.click()
         except: browser.quit(); logging.warn('google+ post handle error 15'); return 0
         sleep(10)
-        try: elem = browser.find_element_by_xpath('//div[./div[1]/div[2]/div/div[1]/div/a/text()="%s"]/a'%str(accset['OTHER_SETTING']['page_name']))
+        try: elem = browser.find_element_by_xpath('//div[../div[1]/div[2]/div/div[1]/div/span/text()="%s"]/a'%str(accset['OTHER_SETTING']['page_name']))
         except: browser.quit(); logging.warn('google+ post handle error 16'); return 0
         try: elem.click()
         except: browser.quit(); logging.warn('google+ post handle error 17'); return 0
