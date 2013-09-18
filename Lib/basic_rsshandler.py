@@ -62,8 +62,8 @@ class basicrsshand(object):
         except: self.rsspost['CONTENT'] = ''
         #tag_list = Tags.ParseTags(self.rsspost['CONTENT'])
         #tag_list.extend(Tags.ParseTags(self.rsspost['TITLE']))
-        if tag_list is not None and len(tag_list)>0:
-            self.rsspost['TAG'] = ','.join(tag_list)
+        #if tag_list is not None and len(tag_list)>0:
+        #    self.rsspost['TAG'] = ','.join(tag_list)
         self.withhtmltree(htmltree)
         return
         
