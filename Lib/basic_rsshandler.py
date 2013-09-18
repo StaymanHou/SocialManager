@@ -60,8 +60,8 @@ class basicrsshand(object):
         self.rsspost['CONTENT'] = '\n'.join([lxmlhtml.tostring(child) for child in mostptagelem if (child.tag=='p') and (child.text is not None) and ('Like Us on' not in child.text)])
         try: self.rsspost['CONTENT'] = self.rsspost['CONTENT'].decode('utf-8').encode('ascii','ignore')
         except: self.rsspost['CONTENT'] = ''
-        tag_list = Tags.ParseTags(self.rsspost['CONTENT'])
-        tag_list.extend(Tags.ParseTags(self.rsspost['TITLE']))
+        #tag_list = Tags.ParseTags(self.rsspost['CONTENT'])
+        #tag_list.extend(Tags.ParseTags(self.rsspost['TITLE']))
         if tag_list is not None and len(tag_list)>0:
             self.rsspost['TAG'] = ','.join(tag_list)
         self.withhtmltree(htmltree)
