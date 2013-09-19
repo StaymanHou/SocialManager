@@ -94,6 +94,7 @@ class handler(basicposterhandler):
                     elem = e
                     break
             if elem is None: browser.quit(); logging.warn('facebook post handle error 14'); return 0
+            if not elem.is_displayed(): browser.quit(); logging.warn('facebook post handle error 14.5'); return 0
             elem.send_keys(imgdir+queueitem['IMAGE_FILE'])
             try: elems = browser.find_elements_by_xpath('//textarea[@name="xhpc_message_text"]')
             except: browser.quit(); logging.warn('facebook post handle error 15'); return 0
