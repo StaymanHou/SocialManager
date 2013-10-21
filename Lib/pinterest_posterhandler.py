@@ -64,7 +64,7 @@ class handler(basicposterhandler):
         s = requests.Session()
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:21.0) Gecko/20100101 Firefox/21.0'}
         # visit login page
-        url = 'https://pinterest.com/login'
+        url = 'https://www.pinterest.com/login'
         try: r = s.get(url, headers=headers)
         except Exception, e: logging.warn('pinterest post handle no response: %s : %s'%(url, e)); return 0
         if r.status_code!=200: logging.warn('pinterest post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
@@ -78,10 +78,10 @@ class handler(basicposterhandler):
         headers['X-CSRFToken'] = r.cookies.get_dict()['csrftoken']
         sleep(load_iteration)
         # login
-        url = 'https://pinterest.com/resource/UserSessionResource/create/'
+        url = 'https://www.pinterest.com/resource/UserSessionResource/create/'
         payload = 'data={"options":{"username_or_email":"'+accset['USERNAME']+'","password":"'+accset['PSWD']+'"},"context":{"app_version":"'+app_version+'"}}&source_url=/login/&module_path=App()>LoginPage()>Login()>Button('
         payload = urllib.quote_plus(payload).replace('%28','(').replace('%29',')').replace('%3D','=').replace('%26','&')+'class_name%3Dprimary%2C+text%3DLog+in%2C+type%3Dsubmit%2C+tagName%3Dbutton%2C+size%3Dlarge)'
-        headers['Referer'] = 'https://pinterest.com/login'
+        headers['Referer'] = 'https://www.pinterest.com/login'
         try: r = s.post(url, data=payload, headers=headers)
         except Exception, e: logging.warn('pinterest post handle no response: %s : %s'%(url, e)); return 0
         if r.status_code!=200: logging.warn('pinterest post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
@@ -95,8 +95,8 @@ class handler(basicposterhandler):
         url += '&source_url='+urllib.quote_plus('/'+username+'/boards/')
         url += '&module_path='+urllib.quote_plus('App()>Header()>UserMenu(resource=UserResource(username='+username+'))>Dropdown()>UserDropdown()>List(items=[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object], tagName=ul)').replace('%28','(').replace('%29',')')
         url += '&_='+str(int(1000*time.time()))
-        url = 'http://pinterest.com/resource/NoopResource/get/'+url
-        headers['Referer'] = 'http://pinterest.com/'+username+'/boards/'
+        url = 'http://www.pinterest.com/resource/NoopResource/get/'+url
+        headers['Referer'] = 'http://www.pinterest.com/'+username+'/boards/'
         try: r = s.get(url, headers=headers)
         except Exception, e: logging.warn('pinterest post handle no response: %s : %s'%(url, e)); return 0
         if r.status_code!=200: logging.warn('pinterest post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
@@ -116,7 +116,7 @@ class handler(basicposterhandler):
         description += 'More: '+queueitem['LINK']
         link = queueitem['LINK']
         image_link = queueitem['OTHER_FIELD']['image_link']
-        url = 'http://pinterest.com/resource/PinResource/create/'
+        url = 'http://www.pinterest.com/resource/PinResource/create/'
         urlencodedlink = urllib.quote_plus(link)
         payload = {'data':{'options':{'board_id': board_id.encode('ascii','replace'),
                                       'description': description.replace('\'','%27'),
@@ -125,8 +125,8 @@ class handler(basicposterhandler):
                                       'method': 'scraped'},
                            'context':{'app_version': app_version.encode('ascii','replace')}},
                    'source_url': '/pin/find/?url='+urlencodedlink,
-                   'module_path':'App()>ImagesFeedPage(resource=FindPinImagesResource(url='+link+'))>Grid()>GridItems()>Pinnable()>ShowModalButton(submodule=[object Object], primary_on_hover=true, color=primary, text=Pin it, class_name=repinSmall, tagName=button, show_text=false, has_icon=true, ga_category=pin_create)#Modal(module=PinCreate())'}
-        headers['Referer'] = 'http://pinterest.com/pin/find/?url='+urlencodedlink
+                   'module_path':'App()>ImagesFeedPage(resource=FindPinImagesResource(url='+link+'))>Grid()>GridItems()>Pinnable()>ShowModalButton(module=PinCreate)#Modal(module=PinCreate())'}
+        headers['Referer'] = 'http://www.pinterest.com/pin/find/?url='+urlencodedlink
         try: r = s.post(url, data=urllib.urlencode(payload).replace('%22','%5C%22').replace('%27','%22').replace('%2527','%27'), headers=headers)           
         except Exception, e: logging.warn('pinterest post handle no response: %s : %s'%(url, e)); return 0
         if r.status_code!=200: logging.warn('pinterest post handle unexpected response: %s : %s'%(url, r.status_code)); return 0

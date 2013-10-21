@@ -1,8 +1,5 @@
 from basic_posterhandler import *
-import time
-from time import sleep, time
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 #from selenium.webdriver import ActionChains
 #from selenium.webdriver.remote.command import Command
 import logging
@@ -68,10 +65,14 @@ class handler(basicposterhandler):
         try: elem.click()
         except: browser.quit(); logging.warn('google+ post handle error 9'); return 0
         sleep(load_iteration)
-        try: elem = browser.find_element_by_xpath('//span[contains(text(), "+")]')
-        except: browser.quit(); logging.warn('google+ post handle error 10'); return 0
-        try: elem.click()
-        except: browser.quit(); logging.warn('google+ post handle error 11'); return 0
+        # try: elem = browser.find_element_by_xpath('//span[contains(text(), "+")]')
+        # except: browser.quit(); logging.warn('google+ post handle error 10'); return 0
+        # try: elem.click()
+        # except: browser.quit(); logging.warn('google+ post handle error 11'); return 0
+        try:
+            browser.get('https://plus.google.com/u/0/')
+        except:
+            browser.quit(); logging.warn('google+ post handle error 10.5'); return 0
         sleep(10)
         # switch identity
         try: elem = browser.find_element_by_xpath('//div[text()="Home"]')
@@ -90,7 +91,7 @@ class handler(basicposterhandler):
         except: browser.quit(); logging.warn('google+ post handle error 17'); return 0
         sleep(10)
         # share dialog
-        try: elem = browser.find_element_by_xpath('//span[text()="Share"]')
+        try: elem = browser.find_element_by_xpath('//div[text()="Share"]')
         except: browser.quit(); logging.warn('google+ post handle error 18'); return 0
         try: elem.click()
         except: browser.quit(); logging.warn('google+ post handle error 19'); return 0
@@ -126,7 +127,8 @@ class handler(basicposterhandler):
             #'var img = document.createElement("img"); img.setAttribute("src", "http://images.scienceworldreport.com/data/images/full/4238/tanning.jpg").setAttribute("id", "smuploadimg"); document.body.appendChild(img);'
         else:
             # type 1
-            try: browser.switch_to_frame(browser.find_element_by_xpath('//iframe[@title="Share"]'))
+            # try: browser.switch_to_frame(browser.find_element_by_xpath('//iframe[@title="Share"]'))
+            try: browser.switch_to_frame(browser.find_element_by_xpath('//iframe[../../div/div[1]/a/div/text()="Share"]'))
             except: browser.quit(); logging.warn('google+ post handle error 21'); return 0
             try: elem = browser.find_element_by_xpath('//span[@title="Add link"]')
             except: browser.quit(); logging.warn('google+ post handle error 22'); return 0
