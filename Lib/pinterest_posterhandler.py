@@ -113,8 +113,8 @@ class handler(basicposterhandler):
         description = ''
         if queueitem['TITLE'] is not None and len(queueitem['TITLE'].strip())>0: description += addhashtag(queueitem['TITLE'], queueitem['TAG'], mode = 1)+' '
         # removed according to  the customers request: if queueitem['CONTENT'] is not None and len(queueitem['CONTENT'].strip())>0: description += addhashtag(queueitem['CONTENT'], queueitem['TAG'])+' | '
-        description += 'More: '+queueitem['LINK']
-        link = queueitem['LINK']
+        link = str(queueitem['LINK'])
+        description += 'More: '+link
         image_link = queueitem['OTHER_FIELD']['image_link']
         url = 'http://www.pinterest.com/resource/PinResource/create/'
         urlencodedlink = urllib.quote_plus(link)
