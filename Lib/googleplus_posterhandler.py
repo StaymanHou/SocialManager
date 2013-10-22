@@ -145,7 +145,8 @@ class handler(basicposterhandler):
             try: elem = browser.find_element_by_xpath('//div[2][../div/text()="Share what\'s new..."]')
             except: browser.quit(); logging.warn('google+ post handle error 27'); return 0
             content = addhashtag(queueitem['CONTENT'], queueitem['TAG'], mode = 1)
-            elem.send_keys(content)
+            try: elem.send_keys(content)
+            except: browser.quit(); logging.warn('google+ post handle error 27.5'); return 0
         # common part
             # delete everything first
         # the circle selection dialog is not clickable any more
