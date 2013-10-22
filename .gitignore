@@ -7,3 +7,6 @@
 # Log #
 #######
 log.txt
+# Unittest #
+############
+*test.py
