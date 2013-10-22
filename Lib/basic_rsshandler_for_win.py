@@ -22,9 +22,9 @@ class basicrsshand(object):
             t = dateutilparser.parse(t)
             if t < last_update: continue
             self.rsspost['ACCOUNT'] = Acc['PK']
-            try: self.rsspost['TITLE'] = rsselem.title.decode('utf-8').encode('ascii','ignore')
+            try: self.rsspost['TITLE'] = rsselem.title.encode('ascii','ignore')
             except: self.rsspost['TITLE'] = ''
-            try: self.rsspost['DESCRIPTION'] = rsselem.summary.decode('utf-8').encode('ascii','ignore')
+            try: self.rsspost['DESCRIPTION'] = rsselem.summary.encode('ascii','ignore')
             except: self.rsspost['DESCRIPTION'] = ''
             self.rsspost['CONTENT'] = ''
             self.rsspost['TAG'] = ''
@@ -59,7 +59,7 @@ class basicrsshand(object):
         mostptagelem = DOMparser.findelemwithmostptag(htmltree)
         if mostptagelem is None: return
         self.rsspost['CONTENT'] = '\n'.join([lxmlhtml.tostring(child) for child in mostptagelem if (child.tag=='p') and (child.text is not None) and ('Like Us on' not in child.text)])
-        try: self.rsspost['CONTENT'] = self.rsspost['CONTENT'].decode('utf-8').encode('ascii','ignore')
+        try: self.rsspost['CONTENT'] = self.rsspost['CONTENT'].encode('ascii','ignore')
         except: self.rsspost['CONTENT'] = ''
         #tag_list = Tags.ParseTags(self.rsspost['CONTENT'])
         #tag_list.extend(Tags.ParseTags(self.rsspost['TITLE']))
