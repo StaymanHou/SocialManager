@@ -44,7 +44,7 @@ class handler(basicposterhandler):
         try: browser.get('https://www.google.com/')
         except: browser.quit(); logging.warn('google+ post handle error 1'); return 0
         sleep(load_iteration)
-        try: elem = browser.find_element_by_xpath('//span[text()="Sign in"]')
+        try: elem = browser.find_element_by_xpath('//a[text()="Sign in"]')
         except: browser.quit(); logging.warn('google+ post handle error 2'); return 0
         try: elem.click()
         except: browser.quit(); logging.warn('google+ post handle error 3'); return 0
@@ -137,10 +137,10 @@ class handler(basicposterhandler):
             try: elem = browser.find_element_by_xpath('//input[../div/text()="Enter or paste a link"]')
             except: browser.quit(); logging.warn('google+ post handle error 24'); return 0
             elem.send_keys(queueitem['LINK'])
-            try: elem = browser.find_element_by_xpath('//div[text()="Add"]')
-            except: browser.quit(); logging.warn('google+ post handle error 25'); return 0
-            try: elem.click()
-            except: browser.quit(); logging.warn('google+ post handle error 26'); return 0
+            # try: elem = browser.find_element_by_xpath('//div[text()="Add"]')
+            # except: browser.quit(); logging.warn('google+ post handle error 25'); return 0
+            # try: elem.click()
+            # except: browser.quit(); logging.warn('google+ post handle error 26'); return 0
             sleep(10)
             try: elem = browser.find_element_by_xpath('//div[2][../div/text()="Share what\'s new..."]')
             except: browser.quit(); logging.warn('google+ post handle error 27'); return 0
