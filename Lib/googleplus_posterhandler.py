@@ -7,6 +7,7 @@ from MyQueue import *
 from RssPost import *
 from Tags import *
 from MyDict import STATUS_DICT
+from time import sleep
 
 class handler(basicposterhandler):
 
