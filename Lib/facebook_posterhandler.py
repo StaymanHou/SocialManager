@@ -8,6 +8,7 @@ from MyQueue import *
 from RssPost import *
 from Tags import *
 from MyDict import STATUS_DICT
+from systemHelper import specialize_path
 
 class handler(basicposterhandler):
 
@@ -51,7 +52,7 @@ class handler(basicposterhandler):
         try: elem = browser.find_element_by_id('pass')
         except: browser.quit(); logging.warn('facebook post handle error 3'); return 0
         elem.send_keys(accset['PSWD'])
-        try: elem = browser.find_element_by_id('loginbutton')
+        try: elem = browser.find_element_by_xpath('//*[@id="loginbutton"]')
         except: browser.quit(); logging.warn('facebook post handle error 4'); return 0
         try: elem.click()
         except: browser.quit(); logging.warn('facebook post handle error 5'); return 0
@@ -95,7 +96,7 @@ class handler(basicposterhandler):
                     break
             if elem is None: browser.quit(); logging.warn('facebook post handle error 14'); return 0
             if not elem.is_displayed(): browser.quit(); logging.warn('facebook post handle error 14.5'); return 0
-            elem.send_keys(imgdir+queueitem['IMAGE_FILE'])
+            elem.send_keys(specialize_path(imgdir+queueitem['IMAGE_FILE']))
             try: elems = browser.find_elements_by_xpath('//textarea[@name="xhpc_message_text"]')
             except: browser.quit(); logging.warn('facebook post handle error 15'); return 0
             elem = None
