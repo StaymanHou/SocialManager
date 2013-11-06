@@ -134,15 +134,14 @@ class handler(basicposterhandler):
                        'post[state]': '0',
                        'post[photoset_layout]': '1',
                        'post[photoset_order]': 'o1',
-                       'images[o1]': '',
-                       'photo_src[]': queueitem['OTHER_FIELD']['image_link']}
+                       'images[o1]': queueitem['OTHER_FIELD']['image_link']}
             headers = {'Content-type': 'application/json', 'Accept': 'application/json, text/javascript, */*'}
             try: r = s.post(url, data=json.dumps(payload), headers=headers)
             except Exception, e: logging.warn('tumblr post handle no response: %s : %s'%(url, e)); return 0
             if r.status_code!=200: logging.warn('tumblr post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
             # check success
             response_json = json.loads(r.text)
-            if 'errors' in response_json and response_json['errors']: return 0
+            if 'errors' in response_json and response_json['errors']: logging.warn('tumblr post handle failed: %s'%r.text); return 0
             return 1
         else:
             # type 1 = link
@@ -204,6 +203,6 @@ class handler(basicposterhandler):
             if r.status_code!=200: logging.warn('tumblr post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
             # check success
             response_json = json.loads(r.text)
-            if 'errors' in response_json and response_json['errors']: return 0
+            if 'errors' in response_json and response_json['errors']: logging.warn('tumblr post handle failed: %s'%r.text); return 0
             return 1        
         
