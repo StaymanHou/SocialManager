@@ -42,6 +42,11 @@ class handler(basicposterhandler):
 
     # override
     def post_handle(self, accset, queueitem, imgdir, load_iteration=1):
+        # validate
+        if queueitem['TYPE']==2:
+            try: imgfile = open(imgdir+queueitem['IMAGE_FILE'], 'rb').read()
+            except Exception, e: logging.warn('twitter post handle can\'t find image file: %s'%queueitem['IMAGE_FILE']); return 0
+
         s = twitter_requests.Session()
         url = 'https://twitter.com/login'
         try: r = s.get(url)
@@ -98,7 +103,7 @@ class handler(basicposterhandler):
                        'impression_id': '',
                        'earned': '',
                        'status': tweet_content+' '+queueitem['LINK']+extra_content,
-                       'media_data[]': b64encode(open(imgdir+queueitem['IMAGE_FILE'], 'rb').read()),
+                       'media_data[]': b64encode(imgfile),
                        'place_id': ''}
             files = {'media_empty': ('', '')}
             try: r = s.post(url, data=payload, files=files)

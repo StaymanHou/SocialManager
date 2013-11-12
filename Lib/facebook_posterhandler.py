@@ -54,6 +54,9 @@ class handler(basicposterhandler):
 
         if (queueitem['TYPE']==2) and (queueitem['IMAGE_FILE'] is not None) and (queueitem['IMAGE_FILE'].strip()!=''):
             # type image
+            
+            try: imgfile = open(imgdir+queueitem['IMAGE_FILE'], 'rb')
+            except Exception, e: logging.warn('facebook post handle can\'t find image file: %s'%queueitem['IMAGE_FILE']); return 0
 
             # get login page
             s = requests.Session()
@@ -142,7 +145,7 @@ class handler(basicposterhandler):
                         'target': accset['OTHER_SETTING']['page_id'],
                         'ref': 'm_upload_pic',
                         'album_fbid': ''}
-            files = {'file1': open(imgdir+queueitem['IMAGE_FILE'], 'rb')}
+            files = {'file1': imgfile}
             try: r = s.post(url, data=payload, files=files)
             except Exception, e: logging.warn('facebook post handle no response: %s : %s'%(url, e)); return 0
             if r.status_code!=200: logging.warn('facebook post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
