@@ -171,23 +171,32 @@ class handler(basicposterhandler):
             except: browser.quit(); logging.warn('facebook post handle error 5'); return 0
             sleep(load_iteration)
             # switch identity
-            try: browser.get('https://www.facebook.com'+accset['OTHER_SETTING']['page_path'].strip())
+            try: elem = browser.find_element_by_id('userNavigationLabel')
             except: browser.quit(); logging.warn('facebook post handle error 6'); return 0
+            elem.click()
+            try: elem = browser.find_element_by_xpath('//a[./div/div/div/text()="%s"]'%str(accset['OTHER_SETTING']['page_name']))
+            except: browser.quit(); logging.warn('facebook post handle error 7'); return 0
+            try: elem.click()
+            except: browser.quit(); logging.warn('facebook post handle error 8'); return 0
             sleep(load_iteration)
-            voice_flag = False
-            try: elem = browser.find_element_by_xpath('//div[@class="pagesVoiceBarText" and contains(text(),"%s")]'%accset['OTHER_SETTING']['page_name'])
-            except: voice_flag = True
+            # try: browser.get('https://www.facebook.com'+accset['OTHER_SETTING']['page_path'].strip())
+            # except: browser.quit(); logging.warn('facebook post handle error 6'); return 0
+            # sleep(load_iteration)
+            # voice_flag = False
+            # try: elem = browser.find_element_by_xpath('//div[@class="pagesVoiceBarText" and contains(text(),"%s")]'%accset['OTHER_SETTING']['page_name'])
+            # except: voice_flag = True
 
-            if voice_flag:
-                try: elem = browser.find_element_by_xpath('//span[@class="pagesAltVoiceText fwb"]/a')
-                except: browser.quit(); logging.warn('facebook post handle error 7'); return 0
-                try: elem.click()
-                except: browser.quit(); logging.warn('facebook post handle error 8'); return 0
-                sleep(load_iteration)
+            # if voice_flag:
+            #     try: elem = browser.find_element_by_xpath('//span[@class="pagesAltVoiceText fwb"]/a')
+            #     except: browser.quit(); logging.warn('facebook post handle error 7'); return 0
+            #     try: elem.click()
+            #     except: browser.quit(); logging.warn('facebook post handle error 8'); return 0
+            #     sleep(load_iteration)
 
             # post
             sleep(10)
-            try: elems = browser.find_elements_by_xpath('//textarea[@aria-label="Write something..."]')
+            try: elems = browser.find_elements_by_xpath('//textarea[@name="xhpc_message"]')
+            # try: elems = browser.find_elements_by_xpath('//textarea[@aria-label="Write something..."]')
             except: browser.quit(); logging.warn('facebook post handle error 20'); return 0
             elem = None
             for e in elems:
