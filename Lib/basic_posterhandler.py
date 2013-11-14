@@ -34,7 +34,7 @@ class basicposterhandler(object):
         PS = TS + PD*TD
         PE = TS + (PD+1)*TD
         QI = None
-        thisqueuelst = self.queue.GetPkList(Acc['PK'], AccSet['MODULE'], PS, PE)
+        thisqueuelst = self.queue.GetPkList(Acc['PK'], AccSet['MODULE'], 0, PE)
         if (thisqueuelst is None) or (len(thisqueuelst)==0):
             if self.queue.GetPendingFirst(Acc['PK'], AccSet['MODULE']):
                 lasttime = MyQueue.GetLastTime(Acc['PK'], AccSet['MODULE'])
