@@ -7,6 +7,7 @@ import DOMparser
 from lxml import etree
 from lxml import html as lxmlhtml
 from systemHelper import parseTime
+from MyFunction import randomString
 
 class basicrsshand(object):
     def __init__(self):
@@ -44,7 +45,7 @@ class basicrsshand(object):
         try: r = requests.get(self.rsspost['IMAGE_LINK'])
         except: return
         if r.status_code!=200: return
-        self.rsspost['IMAGE_FILE'] = str(time.time())+'_'+self.rsspost['IMAGE_LINK'].split('/')[-1][-128:]
+        self.rsspost['IMAGE_FILE'] = str(time.time())+'_'+randomString(16)
         with open(self.imgdir+self.rsspost['IMAGE_FILE'], 'wb') as f:
             for chunk in r.iter_content():
                 f.write(chunk)

@@ -1,5 +1,9 @@
-from datetime import datetime, timedelta
 import os
+
+def randomString(length):
+    import random
+    import string
+    return ''.join(random.choice(string.letters) for i in range(length))
 
 def floorbyhour(input_datetime):
     d = timedelta(seconds=(input_datetime.minute*60+input_datetime.second),microseconds=input_datetime.microsecond)
