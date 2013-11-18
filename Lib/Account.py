@@ -20,7 +20,7 @@ class Account(object):
             self.fields[field] = value
     
     def StaticGetActiveList():
-        cur = Mydb.MydbExec(("SELECT PK, NAME, RSS_URL, ACTIVE, LAST_UPDATE, DELETED FROM account WHERE ACTIVE = True AND DELETED = False",))
+        cur = Mydb.MydbExec(("SELECT PK, NAME, RSS_URL, ACTIVE, TAG_LIMIT, LAST_UPDATE, DELETED FROM account WHERE ACTIVE = True AND DELETED = False",))
         acclst = cur.fetchall()
         return acclst
 

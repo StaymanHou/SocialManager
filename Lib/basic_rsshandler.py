@@ -1,4 +1,3 @@
-import feedparser
 from datetime import datetime
 from RssPost import *
 from Tags import *
@@ -7,6 +6,7 @@ import time
 import DOMparser
 from lxml import etree
 from lxml import html as lxmlhtml
+from systemHelper import parseTime
 
 class basicrsshand(object):
     def __init__(self):
@@ -18,7 +18,7 @@ class basicrsshand(object):
         last_update = Acc['LAST_UPDATE']
         for rsselem in d.entries:
             t = rsselem.published
-            t = datetime.strptime(t, '%a, %d %b %Y %H:%M:%S %Z')
+            t = parseTime(t)
             if t < last_update: continue
             self.rsspost['ACCOUNT'] = Acc['PK']
             try: self.rsspost['TITLE'] = rsselem.title.encode('ascii','ignore')
@@ -34,8 +34,8 @@ class basicrsshand(object):
             self.rsspost['LINK'] = rsselem.link
             self.rsspost['OTHER_FIELD'] = None
             self.rsspost['SOCIAL_SCORE'] = 0
-            self.rsspost['CREATE_TIME'] = datetime.strptime(rsselem.published, '%a, %d %b %Y %H:%M:%S %Z')
-            if self.rsspost['LINK']!=None and len(self.rsspost['LINK'])>0: self.getcontent()
+            self.rsspost['CREATE_TIME'] = parseTime(rsselem.published)
+            if self.rsspost['LINK']!=None and len(self.rsspost['LINK'])>0: self.getcontent(Acc['TAG_LIMIT'])
             self.rsspost.Put()
         last_update = self.now
         return last_update
@@ -50,7 +50,8 @@ class basicrsshand(object):
                 f.write(chunk)
         return
 
-    def getcontent(self):
+    def getcontent(self, tag_limit):
+        tag_limit = int(tag_limit)
         try: r = requests.get(self.rsspost['LINK'])
         except: return
         if r.status_code!=200: return
@@ -60,10 +61,10 @@ class basicrsshand(object):
         self.rsspost['CONTENT'] = '\n'.join([lxmlhtml.tostring(child) for child in mostptagelem if (child.tag=='p') and (child.text is not None) and ('Like Us on' not in child.text)])
         try: self.rsspost['CONTENT'] = self.rsspost['CONTENT'].encode('ascii','ignore')
         except: self.rsspost['CONTENT'] = ''
-        #tag_list = Tags.ParseTags(self.rsspost['CONTENT'])
-        #tag_list.extend(Tags.ParseTags(self.rsspost['TITLE']))
-        #if tag_list is not None and len(tag_list)>0:
-        #    self.rsspost['TAG'] = ','.join(tag_list)
+        tag_list = Tags.ParseTags(self.rsspost['CONTENT'])
+        tag_list.extend(Tags.ParseTags(self.rsspost['TITLE']))
+        if tag_list is not None and len(tag_list)>0 and tag_limit>0:
+           self.rsspost['TAG'] = ','.join(tag_list[:tag_limit])
         self.withhtmltree(htmltree)
         return
         
