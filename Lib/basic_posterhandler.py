@@ -4,8 +4,6 @@ from AutoMode import *
 from Tags import *
 from MyDict import STATUS_DICT
 from random import randint
-import requests
-import time
 
 class basicposterhandler(object):
     def __init__(self):
