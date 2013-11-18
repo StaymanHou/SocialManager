@@ -52,23 +52,41 @@ class handler(basicposterhandler):
             logging.warn('facebook post handle page_id not specified! e.g. "203819689790928"')
             return 0
 
+        flag_close_browser = False
+        if (queueitem['TYPE']==2) and (queueitem['IMAGE_FILE'] is not None) and (queueitem['IMAGE_FILE'].strip()!=''):
+            pass
+        else:
+            self.browser = webdriver.Firefox()
+            flag_close_browser = True
+        try:
+            self.inner_handle(accset, queueitem, imgdir, load_iteration)
+        except Exception, e:
+            logging.warn('facebook post handle error: %s'%str(e))
+            return 0
+        else:
+            return 1
+        finally:
+            if flag_close_browser:
+                self.browser.quit()
+
+    def inner_handle(self, accset, queueitem, imgdir, load_iteration=1):
         if (queueitem['TYPE']==2) and (queueitem['IMAGE_FILE'] is not None) and (queueitem['IMAGE_FILE'].strip()!=''):
             # type image
             
-            try: imgfile = open(imgdir+queueitem['IMAGE_FILE'], 'rb')
-            except Exception, e: logging.warn('facebook post handle can\'t find image file: %s'%queueitem['IMAGE_FILE']); return 0
+            imgfile = open(imgdir+queueitem['IMAGE_FILE'], 'rb')
 
             # get login page
             s = requests.Session()
             url = 'https://m.facebook.com/login.php'
-            try: r = s.get(url)
-            except Exception, e: logging.warn('facebook post handle no response: %s : %s'%(url, e)); return 0
+            r = s.get(url)
             htmltree = etree.HTML(r.text.encode('ascii', 'ignore'))
             elems = htmltree.xpath('//input[@name="lsd"]')
-            if len(elems) == 0: logging.warn('facebook login error: lsd not found.'); return 0
+            if len(elems) == 0:
+                raise Exception('facebook login error: lsd not found.')
             lsd = elems[0].attrib['value']
             elems = htmltree.xpath('//input[@name="li"]')
-            if len(elems) == 0: logging.warn('facebook login error: li not found.'); return 0
+            if len(elems) == 0:
+                raise Exception('facebook login error: li not found.')
             li = elems[0].attrib['value']
             sleep(load_iteration)
 
@@ -87,22 +105,24 @@ class handler(basicposterhandler):
                         'email': accset['USERNAME'],
                         'charset_test': '€,´,€,´,水,Д,Є',
                         'ajax': 0}
-            try: r = s.post(url, data=payload)
-            except Exception, e: logging.warn('facebook post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('facebook post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+            r = s.post(url, data=payload)
+            if r.status_code!=200:
+                raise Exception('facebook post handle unexpected response: %s : %s'%(url, r.status_code))
             sleep(load_iteration)
 
             # switch to page
             url = 'https://m.facebook.com' + accset['OTHER_SETTING']['page_path'].strip()
-            try: r = s.get(url)
-            except Exception, e: logging.warn('facebook post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('facebook post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+            r = s.get(url)
+            if r.status_code!=200:
+                raise Exception('facebook post handle unexpected response: %s : %s'%(url, r.status_code))
             htmltree = etree.HTML(r.text.encode('ascii', 'ignore'))
             elems = htmltree.xpath('//a[text()="Change"]')
-            if len(elems) == 0: logging.warn('facebook switch page error: a[text()="Change"] not found.'); return 0
+            if len(elems) == 0:
+                raise Exception('facebook switch page error: a[text()="Change"] not found.')
             url = 'https://m.facebook.com' + elems[0].attrib['href']
             elems = htmltree.xpath('//a[text()="Change"]')
-            if len(elems) == 0: logging.warn('facebook switch page error: a[text()="Change"] not found.'); return 0
+            if len(elems) == 0:
+                raise Exception('facebook switch page error: a[text()="Change"] not found.')
             url = 'https://m.facebook.com' + elems[0].attrib['href']
             voice_flag = False
             elems = htmltree.xpath('//span[@class="name" and contains(text(), "%s")]'%accset['OTHER_SETTING']['page_name'])
@@ -111,28 +131,31 @@ class handler(basicposterhandler):
 
             # act as page
             if voice_flag:
-                try: r = s.get(url)
-                except Exception, e: logging.warn('facebook post handle no response: %s : %s'%(url, e)); return 0
-                if r.status_code!=200: logging.warn('facebook post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+                r = s.get(url)
+                if r.status_code!=200:
+                    raise Exception('facebook post handle unexpected response: %s : %s'%(url, r.status_code))
 
             # photo post
-            # if not queueitem['IMAGE_FILE']: logging.warn('No image file specified in a image type tweet.'); return 0
             url = 'https://m.facebook.com/photos/upload/?upload_source=advanced_composer&max_allowed=3&target_id=%s&ref=hl'%accset['OTHER_SETTING']['page_id']
-            try: r = s.get(url)
-            except Exception, e: logging.warn('facebook post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('facebook post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+            r = s.get(url)
+            if r.status_code!=200:
+                raise Exception('facebook post handle unexpected response: %s : %s'%(url, r.status_code))
             htmltree = etree.HTML(r.text.encode('ascii', 'ignore'))
             elems = htmltree.xpath('//input[@name="fb_dtsg"]')
-            if len(elems) == 0: logging.warn('facebook photo post error: fb_dtsg not found.'); return 0
+            if len(elems) == 0:
+                raise Exception('facebook photo post error: fb_dtsg not found.')
             fb_dtsg = elems[0].attrib['value']
             elems = htmltree.xpath('//input[@name="return_uri"]')
-            if len(elems) == 0: logging.warn('facebook photo post error: return_uri not found.'); return 0
+            if len(elems) == 0:
+                raise Exception('facebook photo post error: return_uri not found.')
             return_uri = elems[0].attrib['value']
             elems = htmltree.xpath('//input[@name="return_uri_error"]')
-            if len(elems) == 0: logging.warn('facebook photo post error: return_uri_error not found.'); return 0
+            if len(elems) == 0:
+                raise Exception('facebook photo post error: return_uri_error not found.')
             return_uri_error = elems[0].attrib['value']
             elems = htmltree.xpath('//form[@method="post"]')
-            if len(elems) == 0: logging.warn('facebook photo post error: form not found.'); return 0
+            if len(elems) == 0:
+                raise Exception('facebook photo post error: form not found.')
             url = elems[0].attrib['action']
 
             # commit post
@@ -146,64 +169,51 @@ class handler(basicposterhandler):
                         'ref': 'm_upload_pic',
                         'album_fbid': ''}
             files = {'file1': imgfile}
-            try: r = s.post(url, data=payload, files=files)
-            except Exception, e: logging.warn('facebook post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('facebook post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
-            return 1
+            r = s.post(url, data=payload, files=files)
+            if r.status_code!=200:
+                raise Exception('facebook post handle unexpected response: %s : %s'%(url, r.status_code))
 
         else:
             # type link
             
-            browser = webdriver.Firefox()
             # login
-            try: browser.get('http://facebook.com')
-            except: browser.quit(); logging.warn('facebook post handle error 1'); return 0
+            self.browser.get('http://facebook.com')
             sleep(load_iteration)
-            try: elem = browser.find_element_by_id('email')
-            except: browser.quit(); logging.warn('facebook post handle error 2'); return 0
+            elem = self.browser.find_element_by_id('email')
             elem.send_keys(accset['USERNAME'])
-            try: elem = browser.find_element_by_id('pass')
-            except: browser.quit(); logging.warn('facebook post handle error 3'); return 0
+            elem = self.browser.find_element_by_id('pass')
             elem.send_keys(accset['PSWD'])
-            try: elem = browser.find_element_by_xpath('//*[@id="loginbutton"]')
-            except: browser.quit(); logging.warn('facebook post handle error 4'); return 0
-            try: elem.click()
-            except: browser.quit(); logging.warn('facebook post handle error 5'); return 0
+            elem = self.browser.find_element_by_xpath('//*[@id="loginbutton"]')
+            elem.click()
             sleep(load_iteration)
             # switch identity
-            try: elem = browser.find_element_by_id('userNavigationLabel')
-            except: browser.quit(); logging.warn('facebook post handle error 6'); return 0
+            elem = self.browser.find_element_by_id('userNavigationLabel')
             elem.click()
-            try: elem = browser.find_element_by_xpath('//a[./div/div/div/text()="%s"]'%str(accset['OTHER_SETTING']['page_name']))
-            except: browser.quit(); logging.warn('facebook post handle error 7'); return 0
-            try: elem.click()
-            except: browser.quit(); logging.warn('facebook post handle error 8'); return 0
+            elem = self.browser.find_element_by_xpath('//a[./div/div/div/text()="%s"]'%str(accset['OTHER_SETTING']['page_name']))
+            elem.click()
             sleep(load_iteration)
-            # try: browser.get('https://www.facebook.com'+accset['OTHER_SETTING']['page_path'].strip())
-            # except: browser.quit(); logging.warn('facebook post handle error 6'); return 0
+            # self.browser.get('https://www.facebook.com'+accset['OTHER_SETTING']['page_path'].strip())
             # sleep(load_iteration)
             # voice_flag = False
-            # try: elem = browser.find_element_by_xpath('//div[@class="pagesVoiceBarText" and contains(text(),"%s")]'%accset['OTHER_SETTING']['page_name'])
+            # try: elem = self.browser.find_element_by_xpath('//div[@class="pagesVoiceBarText" and contains(text(),"%s")]'%accset['OTHER_SETTING']['page_name'])
             # except: voice_flag = True
 
             # if voice_flag:
-            #     try: elem = browser.find_element_by_xpath('//span[@class="pagesAltVoiceText fwb"]/a')
-            #     except: browser.quit(); logging.warn('facebook post handle error 7'); return 0
-            #     try: elem.click()
-            #     except: browser.quit(); logging.warn('facebook post handle error 8'); return 0
+            #     elem = self.browser.find_element_by_xpath('//span[@class="pagesAltVoiceText fwb"]/a')
+            #     elem.click()
             #     sleep(load_iteration)
 
             # post
             sleep(10)
-            try: elems = browser.find_elements_by_xpath('//textarea[@name="xhpc_message"]')
-            # try: elems = browser.find_elements_by_xpath('//textarea[@aria-label="Write something..."]')
-            except: browser.quit(); logging.warn('facebook post handle error 20'); return 0
+            elems = self.browser.find_elements_by_xpath('//textarea[@name="xhpc_message"]')
+            # elems = self.browser.find_elements_by_xpath('//textarea[@aria-label="Write something..."]')
             elem = None
             for e in elems:
                 if e.is_displayed():
                     elem = e
                     break
-            if elem is None: browser.quit(); logging.warn('facebook post handle error 21'); return 0
+            if elem is None:
+                raise Exception('facebook post handle error: can\'t find //textarea[@name="xhpc_message"]')
             elem.click()
             sleep(load_iteration)
             elem.send_keys(queueitem['LINK'])
@@ -212,24 +222,18 @@ class handler(basicposterhandler):
             elem.clear()
             content = addhashtag(queueitem['CONTENT'], queueitem['TAG'], mode = 1)
             elem.send_keys(content)
-            try: elems = browser.find_elements_by_xpath('//button[text()="Post"]')
-            except: browser.quit(); logging.warn('facebook post handle error 22'); return 0
+            elems = self.browser.find_elements_by_xpath('//button[text()="Post"]')
             elem = None
             for e in elems:
                 if e.is_displayed():
                     elem = e
                     break
-            if elem is None: browser.quit(); logging.warn('facebook post handle error 23'); return 0
+            if elem is None:
+                raise Exception('facebook post handle error: can\'t find //button[text()="Post"]')
             elem.click()
             # check success
             sleep(10)
-            try: elem = browser.find_element_by_xpath('//abbr[contains(text(), "seconds ago")]')
-            except:
-                browser.quit();
-                sleep(load_iteration)
-                logging.warn('facebook post handle error 24'); return 0
-            browser.quit()
-            return 1
+            elem = self.browser.find_element_by_xpath('//abbr[contains(text(), "seconds ago")]')
 
 
         
