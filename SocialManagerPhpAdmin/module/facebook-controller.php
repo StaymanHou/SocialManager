@@ -52,7 +52,6 @@ else if ($method=='share'&&$action=='Image Share(1-click)'&&isset($_GET['submitt
     } else if ($queue->TYPE==2) {
         echo 'Image Share(1-click) succeeded!';
     }
-    echo 'awejfpoi weofjqwoi fjowijfoqiwoi vqw gehi uha hviqwh ei';//rm aft dbg
 }
 else if ($method=='share'&&$action=='Manual Share'&&isset($_GET['submitted'])&&isset($_GET['RSSPK'])&&isset($_GET['MODPK']))
 {
