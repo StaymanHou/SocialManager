@@ -7,6 +7,7 @@ from lxml import etree
 from lxml import html as lxmlhtml
 from ..systemHelper import parseTime, specialize_path
 from ..MyFunction import randomString
+import logging
 
 class basicrsshand(object):
     def __init__(self):
@@ -35,6 +36,7 @@ class basicrsshand(object):
             self.rsspost['CREATE_TIME'] = parseTime(rsselem.published)
             if self.rsspost['LINK']!=None and len(self.rsspost['LINK'])>0: self.getcontent(Acc['TAG_LIMIT'])
             if self.rsspost['IMAGE_LINK']!=None and len(self.rsspost['IMAGE_LINK'])>0: self.withimglink()
+            logging.info('Puller: @%s | new feed %s'%(Acc['NAME'], (self.rsspost['TITLE'])[:16]))
             self.rsspost.Put()
         return
 
