@@ -1,12 +1,12 @@
-from RssPost import *
-from Tags import *
+from ..RssPost import *
+from ..Tags import *
 import requests
 import time
-import DOMparser
+from .. import DOMparser
 from lxml import etree
 from lxml import html as lxmlhtml
-from systemHelper import parseTime
-from MyFunction import randomString
+from ..systemHelper import parseTime
+from ..MyFunction import randomString
 
 class basicrsshand(object):
     def __init__(self):
@@ -19,7 +19,6 @@ class basicrsshand(object):
             t = rsselem.published
             t = parseTime(t)
             if t < last_update: continue
-            self.rsspost = RssPost()
             self.rsspost['ACCOUNT'] = Acc['PK']
             try: self.rsspost['TITLE'] = rsselem.title.encode('ascii','ignore')
             except: self.rsspost['TITLE'] = ''
@@ -70,4 +69,9 @@ class basicrsshand(object):
     def withhtmltree(self, htmltree):
         pass
         return
+
+class myrsshand(basicrsshand):
+    """docstring for myrsshand"""
+    def __init__(self):
+        super(myrsshand, self).__init__()
 

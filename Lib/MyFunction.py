@@ -1,4 +1,8 @@
 import os
+from datetime import timedelta
+
+def domainFromUrl(url):
+    return url.split('://')[-1].split('/')[0]
 
 def randomString(length):
     import random
