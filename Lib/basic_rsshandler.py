@@ -1,4 +1,3 @@
-from datetime import datetime
 from RssPost import *
 from Tags import *
 import requests
@@ -11,7 +10,6 @@ from MyFunction import randomString
 
 class basicrsshand(object):
     def __init__(self):
-        self.now = datetime.now()
         self.rsspost = RssPost()
 
     def handle(self, d, Acc, imgdir):
@@ -21,6 +19,7 @@ class basicrsshand(object):
             t = rsselem.published
             t = parseTime(t)
             if t < last_update: continue
+            self.rsspost = RssPost()
             self.rsspost['ACCOUNT'] = Acc['PK']
             try: self.rsspost['TITLE'] = rsselem.title.encode('ascii','ignore')
             except: self.rsspost['TITLE'] = ''
@@ -31,21 +30,20 @@ class basicrsshand(object):
             self.rsspost['IMAGE_FILE'] = None
             if ('media_content' in rsselem) and (len(rsselem.media_content)>0) and ('url' in rsselem.media_content[0]): self.rsspost['IMAGE_LINK'] = rsselem.media_content[0]['url']
             else: self.rsspost['IMAGE_LINK'] = None
-            if self.rsspost['IMAGE_LINK']!=None and len(self.rsspost['IMAGE_LINK'])>0: self.withimglink()
             self.rsspost['LINK'] = rsselem.link
             self.rsspost['OTHER_FIELD'] = None
             self.rsspost['SOCIAL_SCORE'] = 0
             self.rsspost['CREATE_TIME'] = parseTime(rsselem.published)
             if self.rsspost['LINK']!=None and len(self.rsspost['LINK'])>0: self.getcontent(Acc['TAG_LIMIT'])
+            if self.rsspost['IMAGE_LINK']!=None and len(self.rsspost['IMAGE_LINK'])>0: self.withimglink()
             self.rsspost.Put()
-        last_update = self.now
-        return last_update
+        return
 
     def withimglink(self):
         try: r = requests.get(self.rsspost['IMAGE_LINK'])
         except: return
         if r.status_code!=200: return
-        self.rsspost['IMAGE_FILE'] = str(time.time())+'_'+randomString(16)
+        self.rsspost['IMAGE_FILE'] = str(time.time())+'_'+randomString(16)+'.'+self.rsspost['IMAGE_LINK'].split('.')[-1].strip()
         with open(self.imgdir+self.rsspost['IMAGE_FILE'], 'wb') as f:
             for chunk in r.iter_content():
                 f.write(chunk)
