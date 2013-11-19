@@ -6,12 +6,16 @@ import urllib
 import twitter_requests
 import re
 import logging
-from MyQueue import *
-from RssPost import *
-from Tags import *
-from MyDict import STATUS_DICT
+from ..MyQueue import *
+from ..RssPost import *
+from ..Tags import *
+from ..MyDict import STATUS_DICT
 
 class handler(basicposterhandler):
+
+    def __init__(self):
+        super(handler, self).__init__()
+        self.module_name = 'twitter'
 
     # override
     def auto_mode_handle(self, acc, accset, am):
@@ -42,19 +46,28 @@ class handler(basicposterhandler):
 
     # override
     def post_handle(self, accset, queueitem, imgdir, load_iteration=1):
+        try:
+            self.inner_handle(accset, queueitem, imgdir, load_iteration)
+        except Exception, e:
+            logging.warning('post handle error: %s'%str(e))
+            return 0
+        else:
+            return 1
+
+    def inner_handle(self, accset, queueitem, imgdir, load_iteration=1):
         # validate
         if queueitem['TYPE']==2:
-            try: imgfile = open(imgdir+queueitem['IMAGE_FILE'], 'rb').read()
-            except Exception, e: logging.warn('twitter post handle can\'t find image file: %s'%queueitem['IMAGE_FILE']); return 0
+            imgfile = open(imgdir+queueitem['IMAGE_FILE'], 'rb').read()
 
         s = twitter_requests.Session()
         url = 'https://twitter.com/login'
-        try: r = s.get(url)
-        except Exception, e: logging.warn('twitter post handle no response: %s : %s'%(url, e)); return 0
-        if r.status_code!=200: logging.warn('twitter post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+        r = s.get(url)
+        if r.status_code!=200:
+            raise Exception('unexpected response: %s : %s'%(url, r.status_code))
         # extract authenticity_token
         m = re.search('<input type="hidden" name="authenticity_token" value=".+?">',r.text)
-        if m is None: logging.warn('twitter login error: token not found.'); return 0
+        if m is None:
+            raise Exception('login error: token not found.')
         auth_token = m.group(0)[54:-2]
         sleep(load_iteration)
         url = 'https://twitter.com/sessions'
@@ -65,9 +78,9 @@ class handler(basicposterhandler):
                    'remember_me': '0',
                    'redirect_after_login:': '',
                    'authenticity_token': auth_token}
-        try: r = s.post(url, data=payload)
-        except Exception, e: logging.warn('twitter post handle no response: %s : %s'%(url, e)); return 0
-        if r.status_code!=200: logging.warn('twitter post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+        r = s.post(url, data=payload)
+        if r.status_code!=200:
+            raise Exception('unexpected response: %s : %s'%(url, r.status_code))
         sleep(load_iteration)
         # type 1: text tweet
         if queueitem['TYPE']==1:
@@ -82,9 +95,9 @@ class handler(basicposterhandler):
             payload = {'authenticity_token': auth_token,
                        'place_id': '',
                        'status': tweet_content+' '+queueitem['LINK']+extra_content}
-            try: r = s.post(url, data=urllib.urlencode(payload))
-            except Exception, e: logging.warn('twitter post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('twitter post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+            r = s.post(url, data=urllib.urlencode(payload))
+            if r.status_code!=200:
+                raise Exception('unexpected response: %s : %s'%(url, r.status_code))
             # type 2: tweet with image
         elif queueitem['TYPE']==2:
             if (queueitem['EXTRA_CONTENT'] is None or queueitem['EXTRA_CONTENT'].strip()==''):
@@ -92,7 +105,8 @@ class handler(basicposterhandler):
             else:
                 extra_content = ' ' + queueitem['EXTRA_CONTENT'].strip()
             tweet_content = addhashtag(queueitem['TITLE'], queueitem['TAG'], mode = 1)
-            if (queueitem['IMAGE_FILE'] is None) or (queueitem['IMAGE_FILE']==''): logging.warn('No image file specified in a image type tweet.'); return 0
+            if (queueitem['IMAGE_FILE'] is None) or (queueitem['IMAGE_FILE']==''):
+                raise Exception('No image file specified in a image type tweet.')
             if len(tweet_content)>=(93-len(extra_content)):
                 tweet_content = tweet_content[:(89-len(extra_content))] + '... '
             # for debug url = 'http://localhost'
@@ -106,9 +120,9 @@ class handler(basicposterhandler):
                        'media_data[]': b64encode(imgfile),
                        'place_id': ''}
             files = {'media_empty': ('', '')}
-            try: r = s.post(url, data=payload, files=files)
-            except Exception, e: logging.warn('twitter post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('twitter post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+            r = s.post(url, data=payload, files=files)
+            if r.status_code!=200:
+                raise Exception('unexpected response: %s : %s'%(url, r.status_code))
         else:
-            logging.warn('twitter post handle wrong type: %d'%queueitem['TYPE']); return 0
-        return 1
+            raise Exception('wrong type: %d'%queueitem['TYPE'])
+        return

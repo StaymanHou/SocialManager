@@ -1,15 +1,17 @@
 from datetime import datetime, timedelta
-from MyQueue import *
-from AutoMode import *
-from Tags import *
-from MyDict import STATUS_DICT
+from ..MyQueue import *
+from ..AutoMode import *
+from ..Tags import *
+from ..MyDict import STATUS_DICT
 from random import randint
+import logging
 
 class basicposterhandler(object):
     def __init__(self):
         self.now = datetime.now()
         self.queue = MyQueue()
         self.imgdir = None
+        self.module_name = 'basic_module'
 
     def handle(self, Acc, AccSet, imgdir):
         self.imgdir = imgdir
@@ -52,9 +54,11 @@ class basicposterhandler(object):
             if self.post_handle(AccSet, QI, imgdir):
                 QI['STATUS'] = STATUS_DICT['Posted']
                 QI.save()
+                logging.info('Poster: @%s #%s | [POSTED] %s'%(Acc['NAME'], self.module_name, (QI['TITLE'])[:16]))
             else:
                 QI['STATUS'] = STATUS_DICT['PostFail']
                 QI.save()
+                logging.info('Poster: @%s #%s | [FAILED] %s'%(Acc['NAME'], self.module_name, (QI['TITLE'])[:16]))
         return
 
     def auto_mode_handle(self, acc, am):

@@ -8,12 +8,16 @@ from lxml import etree
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import logging
-from MyQueue import *
-from RssPost import *
-from Tags import *
-from MyDict import STATUS_DICT
+from ..MyQueue import *
+from ..RssPost import *
+from ..Tags import *
+from ..MyDict import STATUS_DICT
 
 class handler(basicposterhandler):
+
+    def __init__(self):
+        super(handler, self).__init__()
+        self.module_name = 'facebook'
 
     # override
     def auto_mode_handle(self, acc, accset, am):
@@ -46,10 +50,10 @@ class handler(basicposterhandler):
     def post_handle(self, accset, queueitem, imgdir, load_iteration=1):
         # check required accset['OTHER_SETTING']
         if 'page_path' not in accset['OTHER_SETTING'] or not accset['OTHER_SETTING']['page_path'].strip():
-            logging.warn('facebook post handle page_path not specified! e.g. (https://m.facebook.com)"/pages/Staymancom/203819689790928"')
+            logging.warning('facebook post handle page_path not specified! e.g. (https://m.facebook.com)"/pages/Staymancom/203819689790928"')
             return 0
         if 'page_id' not in accset['OTHER_SETTING'] or not str(accset['OTHER_SETTING']['page_id']).strip():
-            logging.warn('facebook post handle page_id not specified! e.g. "203819689790928"')
+            logging.warning('facebook post handle page_id not specified! e.g. "203819689790928"')
             return 0
 
         flag_close_browser = False
@@ -61,7 +65,7 @@ class handler(basicposterhandler):
         try:
             self.inner_handle(accset, queueitem, imgdir, load_iteration)
         except Exception, e:
-            logging.warn('facebook post handle error: %s'%str(e))
+            logging.warning('post handle error: %s'%str(e))
             return 0
         else:
             return 1

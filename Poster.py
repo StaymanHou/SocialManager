@@ -12,14 +12,26 @@ debug_mode = True
 timeout = 60
 socket.setdefaulttimeout(timeout)
 
-##### Setup the Logging behavior ######
+LOG_FILE_PATH = 'log.txt'
 
-logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',filename='log.txt',datefmt='%m/%d/%Y %I:%M:%S %p',level=logging.WARNING)
-console = logging.StreamHandler()
-console.setLevel(logging.WARNING)
-formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
-console.setFormatter(formatter)
-logging.getLogger('').addHandler(console)
+#################
+# Setup logging #
+#################
+logger = logging.getLogger('')
+logger.setLevel(logging.DEBUG)
+# create file handler which logs warning or higher
+fh = logging.FileHandler(LOG_FILE_PATH)
+fh.setLevel(logging.WARNING)
+# create console handler with a lower log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+# add the handlers to logger
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 print 'Starting Poster'
 
@@ -33,15 +45,15 @@ while 1:
         for Mod in ModLst:
             AccSet = AccSetting.GetByAccAndMod(Acc['PK'], Mod['PK'])
             if (AccSet is None) or (len(AccSet)==0):
-                logging.warn('Fail to load account setting: %s %s'%(Acc['NAME'], Mod['NAME']))
+                logging.warning('Fail to load account setting: %s %s'%(Acc['NAME'], Mod['NAME']))
                 continue
             if AccSet['ACTIVE']==False: continue
-            modname = 'Lib.'+Mod['NAME']+'_posterhandler'
+            modname = 'Lib.PostHandler.'+Mod['NAME']+'_posterhandler'
             try:
                 mod = __import__(modname, fromlist=[''])
                 handler = mod.handler()
             except Exception, e:
-                logging.warn('Fail to load poster module: %s : %s'%(Mod['NAME'], e))
+                logging.warning('Fail to load poster module: %s : %s'%(Mod['NAME'], e))
                 continue
             handler.handle(Acc, AccSet, Config['IMAGE_FILE_DIR'])
         print 'Poster: End Checking @%s'%Acc['NAME']

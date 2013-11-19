@@ -1,17 +1,20 @@
 from basic_posterhandler import *
-import time
 from time import sleep
 import urllib
 import requests
 import logging
 import json
 from lxml import etree
-from MyQueue import *
-from RssPost import *
-from Tags import *
-from MyDict import STATUS_DICT
+from ..MyQueue import *
+from ..RssPost import *
+from ..Tags import *
+from ..MyDict import STATUS_DICT
 
 class handler(basicposterhandler):
+
+  def __init__(self):
+    super(handler, self).__init__()
+    self.module_name = 'tumblr'
 
     # override
     def auto_mode_handle(self, acc, accset, am):
@@ -48,26 +51,37 @@ class handler(basicposterhandler):
 
     # override
     def post_handle(self, accset, queueitem, imgdir, load_iteration=1):
+        try:
+            self.inner_handle(accset, queueitem, imgdir, load_iteration)
+        except Exception, e:
+            logging.warning('tumblr post handle error: %s'%str(e))
+            return 0
+        else:
+            return 1
+
+    def inner_handle(self, accset, queueitem, imgdir, load_iteration=1):
         s = requests.Session()
         # visit login page and get cookie
         url = 'https://www.tumblr.com/login'
-        try: r = s.get(url)
-        except Exception, e: logging.warn('tumblr post handle no response: %s : %s'%(url, e)); return 0
-        if r.status_code!=200: logging.warn('tumblr post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+        r = s.get(url)
+        if r.status_code!=200:
+            raise Exception('unexpected response: %s : %s'%(url, r.status_code))
         htmltree = etree.HTML(r.text)
         elem = htmltree.xpath('//input[@name="recaptcha_public_key"]')
-        if len(elem)==0:  logging.warn('tumblr can\'t get //input[@name="recaptcha_public_key"]'); return 0
+        if len(elem)==0:
+            raise Exception('can\'t get //input[@name="recaptcha_public_key"]')
         recaptcha_public_key = elem[0].get('value')
         elem = htmltree.xpath('//input[@name="form_key"]')
-        if len(elem)==0:  logging.warn('tumblr can\'t get //input[@name="form_key"]'); return 0
+        if len(elem)==0:
+            raise Exception('can\'t get //input[@name="form_key"]')
         capture = form_key = elem[0].get('value')
         elems = htmltree.xpath('//img[@style and @src]')
         for elem in elems:
             url = elem.get('src')
             sleep(load_iteration)
-            try: r = s.get(url)
-            except Exception, e: logging.warn('tumblr post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('tumblr post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+            r = s.get(url)
+            if r.status_code!=200:
+                raise Exception('unexpected response: %s : %s'%(url, r.status_code))
         addcookie = {'capture': capture}
         # login
         url = 'https://www.tumblr.com/login'
@@ -81,22 +95,24 @@ class handler(basicposterhandler):
                    'recaptcha_public_key': recaptcha_public_key,
                    'form_key': form_key,
                    'context': 'no_referer'}
-        try: r = s.post(url, data=payload, cookies=addcookie)
-        except Exception, e: logging.warn('tumblr post handle no response: %s : %s'%(url, e)); return 0
-        if r.status_code!=200: logging.warn('tumblr post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+        r = s.post(url, data=payload, cookies=addcookie)
+        if r.status_code!=200:
+            raise Exception('unexpected response: %s : %s'%(url, r.status_code))
         sleep(load_iteration)        
         # go to dashboard
         url = 'https://www.tumblr.com/dashboard'
-        try: r = s.get(url)
-        except Exception, e: logging.warn('tumblr post handle no response: %s : %s'%(url, e)); return 0
-        if r.status_code!=200: logging.warn('tumblr post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+        r = s.get(url)
+        if r.status_code!=200:
+            raise Exception('unexpected response: %s : %s'%(url, r.status_code))
         # extract form key, blog_name
         htmltree = etree.HTML(r.text)
         elem = htmltree.xpath('//form[@id="search_form"]/input[@name="form_key"]')
-        if len(elem)==0:  logging.warn('tumblr can\'t get //form[@id="search_form"]/input[@name="form_key"]'); return 0
+        if len(elem)==0:
+            raise Exception('can\'t get //form[@id="search_form"]/input[@name="form_key"]')
         form_key = elem[0].get('value')
         elem = htmltree.xpath('//form[@id="search_form"]/input[@name="t"]')
-        if len(elem)==0:  logging.warn('tumblr can\'t get //form[@id="search_form"]/input[@name="t"]'); return 0
+        if len(elem)==0:
+            raise Exception('can\'t get //form[@id="search_form"]/input[@name="t"]')
         blog_name = elem[0].get('value')
         if ('blog_name' in accset['OTHER_SETTING']) and (accset['OTHER_SETTING']['blog_name'] is not None) and (accset['OTHER_SETTING']['blog_name'].strip()!=''):
             blog_name = accset['OTHER_SETTING']['blog_name'].strip()        
@@ -136,12 +152,13 @@ class handler(basicposterhandler):
                        'post[photoset_order]': 'o1',
                        'images[o1]': queueitem['OTHER_FIELD']['image_link']}
             headers = {'Content-type': 'application/json', 'Accept': 'application/json, text/javascript, */*'}
-            try: r = s.post(url, data=json.dumps(payload), headers=headers)
-            except Exception, e: logging.warn('tumblr post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('tumblr post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+            r = s.post(url, data=json.dumps(payload), headers=headers)
+            if r.status_code!=200:
+                raise Exception('unexpected response: %s : %s'%(url, r.status_code))
             # check success
             response_json = json.loads(r.text)
-            if 'errors' in response_json and response_json['errors']: logging.warn('tumblr post handle failed: %s'%r.text); return 0
+            if 'errors' in response_json and response_json['errors']:
+                raise Exception('handle failed: %s'%r.text)
             return 1
         else:
             # type 1 = link
@@ -150,9 +167,9 @@ class handler(basicposterhandler):
             payload = {'form_key': form_key,
                        'url': queueitem['LINK']}
             headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
-            try: r = s.post(url, data=urllib.urlencode(payload), headers=headers)           
-            except Exception, e: logging.warn('tumblr post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('tumblr post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+            r = s.post(url, data=urllib.urlencode(payload), headers=headers)           
+            if r.status_code!=200:
+                raise Exception('tumblr post handle unexpected response: %s : %s'%(url, r.status_code))
             response_json = json.loads(r.text)
             # organize content
             thumbnail = ''
@@ -198,11 +215,12 @@ class handler(basicposterhandler):
                        'post[publish_on]': '',
                        'post[state]': '0'}
             headers = {'Content-type': 'application/json', 'Accept': 'application/json, text/javascript, */*'}
-            try: r = s.post(url, data=json.dumps(payload), headers=headers)
-            except Exception, e: logging.warn('tumblr post handle no response: %s : %s'%(url, e)); return 0
-            if r.status_code!=200: logging.warn('tumblr post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+            r = s.post(url, data=json.dumps(payload), headers=headers)
+            if r.status_code!=200:
+                raise Exception('unexpected response: %s : %s'%(url, r.status_code))
             # check success
             response_json = json.loads(r.text)
-            if 'errors' in response_json and response_json['errors']: logging.warn('tumblr post handle failed: %s'%r.text); return 0
+            if 'errors' in response_json and response_json['errors']:
+                raise Exception('handle failed: %s'%r.text)
             return 1        
         

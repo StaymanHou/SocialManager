@@ -6,11 +6,10 @@ import requests
 import re
 import logging
 import json
-from lxml import etree
-from MyQueue import *
-from RssPost import *
-from Tags import *
-from MyDict import STATUS_DICT
+from ..MyQueue import *
+from ..RssPost import *
+from ..Tags import *
+from ..MyDict import STATUS_DICT
 
 def recfindboard(jsonobj):
     board_dict = {}
@@ -26,6 +25,10 @@ def recfindboard(jsonobj):
     return board_dict
 
 class handler(basicposterhandler):
+
+    def __init__(self):
+        super(handler, self).__init__()
+        self.module_name = 'pinterest'
 
     # override
     def auto_mode_handle(self, acc, accset, am):
@@ -61,15 +64,25 @@ class handler(basicposterhandler):
 
     # override
     def post_handle(self, accset, queueitem, imgdir, load_iteration=1):
+        try:
+            self.inner_handle(accset, queueitem, imgdir, load_iteration)
+        except Exception, e:
+            logging.warning('post handle error: %s'%str(e))
+            return 0
+        else:
+            return 1
+
+    def inner_handle(self, accset, queueitem, imgdir, load_iteration=1):
         s = requests.Session()
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:21.0) Gecko/20100101 Firefox/21.0'}
         # visit login page
         url = 'https://www.pinterest.com/login'
-        try: r = s.get(url, headers=headers)
-        except Exception, e: logging.warn('pinterest post handle no response: %s : %s'%(url, e)); return 0
-        if r.status_code!=200: logging.warn('pinterest post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
+        r = s.get(url, headers=headers)
+        if r.status_code!=200:
+            raise Exception('unexpected response: %s : %s'%(url, r.status_code))
         m = re.search('{"app_version": ".+?"}', r.text)
-        if m is None: logging.warn('pinterest login error: app_version not found.'); return 0
+        if m is None:
+            raise Exception('login error: app_version not found.')
         app_version = m.group(0)[17:-2]
         headers['X-NEW-APP'] = 1
         headers['X-Requested-With'] = 'XMLHttpRequest'
@@ -82,13 +95,11 @@ class handler(basicposterhandler):
         payload = 'data={"options":{"username_or_email":"'+accset['USERNAME']+'","password":"'+accset['PSWD']+'"},"context":{"app_version":"'+app_version+'"}}&source_url=/login/&module_path=App()>LoginPage()>Login()>Button('
         payload = urllib.quote_plus(payload).replace('%28','(').replace('%29',')').replace('%3D','=').replace('%26','&')+'class_name%3Dprimary%2C+text%3DLog+in%2C+type%3Dsubmit%2C+tagName%3Dbutton%2C+size%3Dlarge)'
         headers['Referer'] = 'https://www.pinterest.com/login'
-        try: r = s.post(url, data=payload, headers=headers)
-        except Exception, e: logging.warn('pinterest post handle no response: %s : %s'%(url, e)); return 0
-        if r.status_code!=200: logging.warn('pinterest post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
-        try: logindata = json.loads(r.text)
-        except: logging.warn('pinterest post handle can\'t parse json: %s'%url); return 0
-        try: username = logindata['resource_response']['data']['username']
-        except: logging.warn('pinterest post handle can\'t find username'); return 0
+        r = s.post(url, data=payload, headers=headers)
+        if r.status_code!=200:
+            raise Exception('unexpected response: %s : %s'%(url, r.status_code))
+        logindata = json.loads(r.text)
+        username = logindata['resource_response']['data']['username']
         sleep(load_iteration)
         # retreive board_id from board_name
         url = '?data='+urllib.quote_plus('{"options":{},"module":{"name":"UserBoards","options":{"username":"'+username+'","secret_board_count":0},"append":false,"errorStrategy":2},"context":{"app_version":"'+app_version+'"}}')
@@ -97,13 +108,13 @@ class handler(basicposterhandler):
         url += '&_='+str(int(1000*time.time()))
         url = 'http://www.pinterest.com/resource/NoopResource/get/'+url
         headers['Referer'] = 'http://www.pinterest.com/'+username+'/boards/'
-        try: r = s.get(url, headers=headers)
-        except Exception, e: logging.warn('pinterest post handle no response: %s : %s'%(url, e)); return 0
-        if r.status_code!=200: logging.warn('pinterest post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
-        try: boarddata = json.loads(r.text)
-        except: logging.warn('pinterest post handle can\'t parse json: %s'%url); return 0
+        r = s.get(url, headers=headers)
+        if r.status_code!=200:
+            raise Exception('unexpected response: %s : %s'%(url, r.status_code))
+        boarddata = json.loads(r.text)
         board_dict = recfindboard(boarddata)
-        if len(board_dict)==0: logging.warn('pinterest can\'t find any board'); return 0
+        if len(board_dict)==0:
+            raise Exception('can\'t find any board')
         board_id = board_dict.values()[0]
         if 'board_name' in accset['OTHER_SETTING'] and accset['OTHER_SETTING']['board_name'] in board_dict:
             board_id = board_dict[accset['OTHER_SETTING']['board_name']]
@@ -127,10 +138,9 @@ class handler(basicposterhandler):
                    'source_url': '/pin/find/?url='+urlencodedlink,
                    'module_path':'App()>ImagesFeedPage(resource=FindPinImagesResource(url='+link+'))>Grid()>GridItems()>Pinnable()>ShowModalButton(module=PinCreate)#Modal(module=PinCreate())'}
         headers['Referer'] = 'http://www.pinterest.com/pin/find/?url='+urlencodedlink
-        try: r = s.post(url, data=urllib.urlencode(payload).replace('%22','%5C%22').replace('%27','%22').replace('%2527','%27'), headers=headers)           
-        except Exception, e: logging.warn('pinterest post handle no response: %s : %s'%(url, e)); return 0
-        if r.status_code!=200: logging.warn('pinterest post handle unexpected response: %s : %s'%(url, r.status_code)); return 0
-        if r.text.endswith('"error": null}}'): return 1
-        logging.warn('pinterest post handle unexpected response: %s : %s'%(url, r.text.encode('ascii','replace')))
-        return 0
+        r = s.post(url, data=urllib.urlencode(payload).replace('%22','%5C%22').replace('%27','%22').replace('%2527','%27'), headers=headers)           
+        if r.status_code!=200:
+            raise Exception('unexpected response: %s : %s'%(url, r.status_code))
+        if r.text.endswith('"error": null}}'): return
+        raise Exception('unexpected response: %s : %s'%(url, r.text.encode('ascii','replace')))
 

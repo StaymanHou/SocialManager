@@ -3,13 +3,17 @@ from PyUserInput.pykeyboard import PyKeyboard
 from basic_posterhandler import *
 from selenium import webdriver
 import logging
-from MyQueue import *
-from RssPost import *
-from Tags import *
-from MyDict import STATUS_DICT
-from systemHelper import specialize_path
+from ..MyQueue import *
+from ..RssPost import *
+from ..Tags import *
+from ..MyDict import STATUS_DICT
+from ..systemHelper import specialize_path
 
 class handler(basicposterhandler):
+
+	def __init__(self):
+		super(handler, self).__init__()
+		self.module_name = 'gplus'
 
 	# override
 	def auto_mode_handle(self, acc, accset, am):
@@ -44,7 +48,7 @@ class handler(basicposterhandler):
 		try:
 			self.inner_handle(accset, queueitem, imgdir, load_iteration)
 		except Exception, e:
-			logging.warn('gplus post handle error: %s'%str(e))
+			logging.warn('post handle error: %s'%str(e))
 			return 0
 		else:
 			return 1
