@@ -1,13 +1,13 @@
 import os
 from datetime import timedelta
+import random
+import string
 
 def domainFromUrl(url):
     return url.split('://')[-1].split('/')[0]
 
 def randomString(length):
-    import random
-    import string
-    return ''.join(random.choice(string.letters) for i in range(length))
+    return ''.join(random.choice(string.ascii_letters) for i in range(length))
 
 def floorbyhour(input_datetime):
     d = timedelta(seconds=(input_datetime.minute*60+input_datetime.second),microseconds=input_datetime.microsecond)

@@ -42,11 +42,8 @@ while 1:
                 if os.path.exists('Lib/RssHandler/'+subdomain+'_rsshandler.py'):
                     modname = 'Lib.RssHandler.'+subdomain+'_rsshandler'
                     break
-            try:
-                mod = __import__(modname, fromlist=[''])
-                handler = mod.myrsshand()
-            except:
-                logging.warning('Can\'t load mod or handle it: '+modname)
+            mod = __import__(modname, fromlist=[''])
+            handler = mod.myrsshand()
             handler.handle(d, Acc, Config['IMAGE_FILE_DIR'])
         last_update = datetime.now()
         Account.SetLastUpdate(Acc['PK'], last_update)
