@@ -32,7 +32,8 @@ class basicposterhandler(object):
         PS = TS + PD*TD
         PE = TS + (PD+1)*TD
         QI = None
-        thisqueuelst = self.queue.GetPkList(Acc['PK'], AccSet['MODULE'], 0, PE)
+        # schedule pending in this period if no scheduled
+        thisqueuelst = self.queue.GetPkList(Acc['PK'], AccSet['MODULE'], PS, PE)
         if (thisqueuelst is None) or (len(thisqueuelst)==0):
             if self.queue.GetPendingFirst(Acc['PK'], AccSet['MODULE']):
                 lasttime = MyQueue.GetLastTime(Acc['PK'], AccSet['MODULE'])
@@ -43,9 +44,8 @@ class basicposterhandler(object):
                 if WS<=WE:
                     scheduletime = PS+timedelta(seconds=randint(WS,WE))
                     self.queue.SetSchedule(scheduletime)
-                    QI = self.queue
-        else:
-            QI = self.queue.GetByPk(thisqueuelst[0]['PK'])
+        # check for first scheduled pending and post
+        QI = MyQueue.GetScheduledPendingFirst(Acc['PK'], AccSet['MODULE'])
         if QI is not None and QI['STATUS']==STATUS_DICT['Pending'] and QI['SCHEDULE_TIME']<=datetime.now():
             if QI['TAG'] is not None and len(QI['TAG'])>0:
                 Tags.SaveTags(QI['TAG'].split(','))

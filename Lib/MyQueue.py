@@ -1,4 +1,3 @@
-import MySQLdb
 import Mydb
 import os
 import json
@@ -91,7 +90,35 @@ class MyQueue(object):
             self.fields['SCHEDULE_TIME'] = row['SCHEDULE_TIME']
         else: return 0
         return 1
-        
+
+    def StaticGetScheduledPendingFirst(AccPk, ModPk):
+        qi = None
+        cur = Mydb.MydbExec(("SELECT PK, STATUS, ACCOUNT, MODULE, TYPE, TITLE, CONTENT, EXTRA_CONTENT, TAG, IMAGE_FILE, LINK, OTHER_FIELD, SCHEDULE_TIME FROM queue WHERE STATUS = %s AND ACCOUNT = %s AND MODULE = %s AND SCHEDULE_TIME > '0000-00-00 00:00:00' ORDER BY SCHEDULE_TIME ASC LIMIT 1",(STATUS_DICT['Pending'], AccPk, ModPk)))
+        if cur.rowcount:
+            row = cur.fetchone()
+            qi = MyQueue()
+            qi['PK'] = row['PK']
+            qi['STATUS'] = row['STATUS']
+            qi['ACCOUNT'] = row['ACCOUNT']
+            qi['MODULE'] = row['MODULE']
+            qi['TYPE'] = row['TYPE']
+            try: qi['TITLE'] = row['TITLE'].decode('utf-8').encode('ascii','ignore')
+            except: qi['TITLE'] = ''
+            try: qi['CONTENT'] = row['CONTENT'].decode('utf-8').encode('ascii','ignore')
+            except: qi['CONTENT'] = ''
+            qi['EXTRA_CONTENT'] = row['EXTRA_CONTENT']
+            qi['TAG'] = row['TAG']
+            qi['IMAGE_FILE'] = row['IMAGE_FILE']
+            qi['LINK'] = row['LINK']
+            if row['OTHER_FIELD'] is not None and row['OTHER_FIELD']!='':
+                qi['OTHER_FIELD'] = json.loads(row['OTHER_FIELD'])
+            else:
+                qi['OTHER_FIELD'] = {}
+            qi['SCHEDULE_TIME'] = row['SCHEDULE_TIME']
+        return qi
+
+    GetScheduledPendingFirst = staticmethod(StaticGetScheduledPendingFirst)
+
     def SetSchedule(self, schedule_time):
         self.fields['SCHEDULE_TIME'] = schedule_time
         self.save()
