@@ -10,6 +10,7 @@ class Account
         $this->PK = null;
         $this->fields = array('NAME' => null,
                               'RSS_URL' => null,
+                              'TAG_LIMIT' => 0,
                               'ACTIVE' => false,
                               'LAST_UPDATE' => null,
                               'DELETED' => false);
@@ -41,7 +42,7 @@ class Account
     public static function getByPK($PK)
     {
         $acc = new Account();
-        $query = sprintf("SELECT `NAME`, `RSS_URL`, `ACTIVE`, `LAST_UPDATE`, `DELETED` FROM `account` WHERE `PK` = %d",$PK);
+        $query = sprintf("SELECT `NAME`, `RSS_URL`, `TAG_LIMIT`, `ACTIVE`, `LAST_UPDATE`, `DELETED` FROM `account` WHERE `PK` = %d",$PK);
         $result = mysql_query($query, $GLOBALS['DB']);
 
         if (mysql_num_rows($result))
@@ -49,6 +50,7 @@ class Account
             $row = mysql_fetch_assoc($result);
             $acc->NAME = $row['NAME'];
             $acc->RSS_URL = $row['RSS_URL'];
+            $acc->TAG_LIMIT = $row['TAG_LIMIT'];
             $acc->ACTIVE = $row['ACTIVE'];
             $acc->LAST_UPDATE = $row['LAST_UPDATE'];
             $acc->DELETED = $row['DELETED'];
@@ -64,7 +66,7 @@ class Account
     {
         $lst = array();
 
-        $query = "SELECT `PK`, `NAME`, `RSS_URL`, `ACTIVE`, `LAST_UPDATE`, `DELETED` FROM `account` WHERE `DELETED` = FALSE ORDER BY PK DESC";
+        $query = "SELECT `PK`, `NAME`, `RSS_URL`, `TAG_LIMIT`, `ACTIVE`, `LAST_UPDATE`, `DELETED` FROM `account` WHERE `DELETED` = FALSE ORDER BY PK DESC";
         $result = mysql_query($query, $GLOBALS['DB']);
         while ($row = mysql_fetch_assoc($result)) {
             array_push($lst, $row);
@@ -106,9 +108,10 @@ class Account
     {
         if ($this->PK!=null)
         {
-            $query = sprintf('UPDATE `account` SET NAME = "%s", RSS_URL = "%s", ACTIVE =%d, LAST_UPDATE = "%s", DELETED = %d WHERE PK = %d',
+            $query = sprintf('UPDATE `account` SET NAME = "%s", RSS_URL = "%s", TAG_LIMIT = %d, ACTIVE =%d, LAST_UPDATE = "%s", DELETED = %d WHERE PK = %d',
                 $this->NAME,
                 $this->RSS_URL,
+                $this->TAG_LIMIT,
                 $this->ACTIVE,
                 $this->LAST_UPDATE,
                 $this->DELETED,
@@ -117,9 +120,10 @@ class Account
         }
         else
         {
-            $query = sprintf('INSERT INTO `account` (NAME, RSS_URL, ACTIVE) VALUES ("%s", "%s", %d)',
+            $query = sprintf('INSERT INTO `account` (NAME, RSS_URL, TAG_LIMIT, ACTIVE) VALUES ("%s", "%s", %d, %d)',
                 $this->NAME,
                 $this->RSS_URL,
+                $this->TAG_LIMIT,
                 $this->ACTIVE);
             mysql_query($query, $GLOBALS['DB']);
             $this->PK = mysql_insert_id($GLOBALS['DB']);

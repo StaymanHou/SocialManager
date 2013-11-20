@@ -12,6 +12,11 @@
     value="<?php echo $acc->RSS_URL;?>" size="60"/></td>
   </tr>
   <tr>
+   <td><label for="TAG_LIMIT">Tag limit</label></td>
+   <td><input type="number" name="TAG_LIMIT" id="TAG_LIMIT"
+    value="<?php echo $acc->TAG_LIMIT;?>"/></td>
+  </tr>
+  <tr>
    <td><label for="ACTIVE">Active</label></td>
    <td>
     <select name="ACTIVE" id="ACTIVE">

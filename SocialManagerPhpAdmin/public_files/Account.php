@@ -41,6 +41,7 @@ else if ($method=='save'&&isset($_POST['submitted']))
         $acc = new Account();
         $acc->NAME = $_POST['NAME'];
         $acc->RSS_URL = $_POST['RSS_URL'];
+        $acc->TAG_LIMIT = $_POST['TAG_LIMIT'];
         $acc->ACTIVE = $_POST['ACTIVE'];
         $acc->save();
         header('Location: accmng.php');
@@ -48,6 +49,7 @@ else if ($method=='save'&&isset($_POST['submitted']))
         $acc = Account::getByPK($_POST['PK']);
         $acc->NAME = $_POST['NAME'];
         $acc->RSS_URL = $_POST['RSS_URL'];
+        $acc->TAG_LIMIT = $_POST['TAG_LIMIT'];
         $acc->ACTIVE = $_POST['ACTIVE'];
         $acc->save();
         header('Location: accmng.php');
