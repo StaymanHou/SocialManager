@@ -46,6 +46,7 @@ class basicposterhandler(object):
                 if WS<=WE:
                     scheduletime = PS+timedelta(seconds=randint(WS,WE))
                     self.queue.SetSchedule(scheduletime)
+                    logging.info('Poster: @%s #%s | [Scheduled] %s'%(Acc['NAME'], self.module_name, (QI['TITLE'])[:16]))
         # check for first scheduled pending and post
         QI = MyQueue.GetScheduledPendingFirst(Acc['PK'], AccSet['MODULE'])
         if QI is not None and QI['STATUS']==STATUS_DICT['Pending'] and QI['SCHEDULE_TIME']<=datetime.now():
