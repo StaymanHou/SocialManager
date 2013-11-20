@@ -45,7 +45,9 @@ logging.info('Starting Cleaner')
 
 Config = MainConf.Get()
 
-MyQueue.Clear(Config['IMAGE_FILE_DIR'], days_ago, force_mode)
-RssPost.Clear(Config['IMAGE_FILE_DIR'], days_ago, force_mode)
+myqueue_count = MyQueue.Clear(Config['IMAGE_FILE_DIR'], days_ago, force_mode)
+rsspost_count = RssPost.Clear(Config['IMAGE_FILE_DIR'], days_ago, force_mode)
+
+logging.warning('Deleted: %d Queue item | %d Rss post'%(myqueue_count, rsspost_count))
 
 logging.info('Exiting Cleaner')
