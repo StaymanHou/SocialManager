@@ -50,7 +50,6 @@ else if ($method=='save'&&isset($_POST['submitted']))
         $accset->EXTRA_CONTENT = $_POST['EXTRA_CONTENT'];
         $accset->ACTIVE = $_POST['ACTIVE'];
         $accset->AUTO_MODE = $_POST['AUTO_MODE'];
-        $accset->TAG_LIMIT = $_POST['TAG_LIMIT'];
         $accset->TIME_START = $_POST['TIME_START'];
         $accset->TIME_END = $_POST['TIME_END'];
         $accset->NUM_PER_DAY = $_POST['NUM_PER_DAY'];
@@ -64,7 +63,6 @@ else if ($method=='save'&&isset($_POST['submitted']))
         $accset->PSWD = $_POST['PSWD'];
         $accset->ACTIVE = $_POST['ACTIVE'];
         $accset->AUTO_MODE = $_POST['AUTO_MODE'];
-        $accset->TAG_LIMIT = $_POST['TAG_LIMIT'];
         $accset->TIME_START = $_POST['TIME_START'];
         $accset->TIME_END = $_POST['TIME_END'];
         $accset->NUM_PER_DAY = $_POST['NUM_PER_DAY'];

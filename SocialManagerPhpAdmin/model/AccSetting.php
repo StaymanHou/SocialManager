@@ -16,7 +16,6 @@ class AccSetting
                               'EXTRA_CONTENT' => '',
                               'ACTIVE' => 0,
                               'AUTO_MODE' => null,
-                              'TAG_LIMIT' => 0,
                               'TIME_START' => '00:00:00',
                               'TIME_END' => '00:00:00',
                               'NUM_PER_DAY' => 24,
@@ -49,7 +48,7 @@ class AccSetting
     public static function getByPK($PK)
     {
         $accset = new AccSetting();
-        $query = sprintf("SELECT `ACCOUNT`, `MODULE`, `USERNAME`, `OTHER_SETTING`, `EXTRA_CONTENT`, `ACTIVE`, `AUTO_MODE`, `TAG_LIMIT`, `TIME_START`, `TIME_END`, `NUM_PER_DAY`, `MIN_POST_INTERVAL`, `QUEUE_SIZE` FROM `acc_setting` WHERE `PK` = %d",$PK);
+        $query = sprintf("SELECT `ACCOUNT`, `MODULE`, `USERNAME`, `OTHER_SETTING`, `EXTRA_CONTENT`, `ACTIVE`, `AUTO_MODE`, `TIME_START`, `TIME_END`, `NUM_PER_DAY`, `MIN_POST_INTERVAL`, `QUEUE_SIZE` FROM `acc_setting` WHERE `PK` = %d",$PK);
         $result = mysql_query($query, $GLOBALS['DB']);
 
         if (mysql_num_rows($result))
@@ -62,7 +61,6 @@ class AccSetting
             $accset->EXTRA_CONTENT = $row['EXTRA_CONTENT'];
             $accset->ACTIVE = $row['ACTIVE'];
             $accset->AUTO_MODE = $row['AUTO_MODE'];
-            $accset->TAG_LIMIT = $row['TAG_LIMIT'];
             $accset->TIME_START = $row['TIME_START'];
             $accset->TIME_END = $row['TIME_END'];
             $accset->NUM_PER_DAY = $row['NUM_PER_DAY'];
@@ -78,7 +76,7 @@ class AccSetting
     public static function getByAccMod($Acc, $Mod)
     {
         $accset = new AccSetting();
-        $query = sprintf("SELECT `PK`, `ACCOUNT`, `MODULE`, `USERNAME`, `OTHER_SETTING`, `EXTRA_CONTENT`, `ACTIVE`, `AUTO_MODE`, `TAG_LIMIT`, `TIME_START`, `TIME_END`, `NUM_PER_DAY`, `MIN_POST_INTERVAL`, `QUEUE_SIZE` FROM `acc_setting` WHERE `ACCOUNT` = %d AND `MODULE` = %d", $Acc, $Mod);
+        $query = sprintf("SELECT `PK`, `ACCOUNT`, `MODULE`, `USERNAME`, `OTHER_SETTING`, `EXTRA_CONTENT`, `ACTIVE`, `AUTO_MODE`, `TIME_START`, `TIME_END`, `NUM_PER_DAY`, `MIN_POST_INTERVAL`, `QUEUE_SIZE` FROM `acc_setting` WHERE `ACCOUNT` = %d AND `MODULE` = %d", $Acc, $Mod);
         $result = mysql_query($query, $GLOBALS['DB']);
 
         if (mysql_num_rows($result))
@@ -91,7 +89,6 @@ class AccSetting
             $accset->EXTRA_CONTENT = $row['EXTRA_CONTENT'];
             $accset->ACTIVE = $row['ACTIVE'];
             $accset->AUTO_MODE = $row['AUTO_MODE'];
-            $accset->TAG_LIMIT = $row['TAG_LIMIT'];
             $accset->TIME_START = $row['TIME_START'];
             $accset->TIME_END = $row['TIME_END'];
             $accset->NUM_PER_DAY = $row['NUM_PER_DAY'];
@@ -109,7 +106,7 @@ class AccSetting
     {
         $lst = array();
         
-        $query = "SELECT `PK`, `ACCOUNT`, `MODULE`, `USERNAME`, `OTHER_SETTING`, `EXTRA_CONTENT`, `ACTIVE`, `AUTO_MODE`, `TAG_LIMIT`, `TIME_START`, `TIME_END`, `NUM_PER_DAY`, `MIN_POST_INTERVAL`, `QUEUE_SIZE` FROM `acc_setting` WHERE 1";
+        $query = "SELECT `PK`, `ACCOUNT`, `MODULE`, `USERNAME`, `OTHER_SETTING`, `EXTRA_CONTENT`, `ACTIVE`, `AUTO_MODE`, `TIME_START`, `TIME_END`, `NUM_PER_DAY`, `MIN_POST_INTERVAL`, `QUEUE_SIZE` FROM `acc_setting` WHERE 1";
         if ($account!=null)
         {
             $query .= sprintf(" AND ACCOUNT = %d", $account);
@@ -145,7 +142,7 @@ class AccSetting
         if ($this->PK!=null)
         {
             if ($withpw) {
-                $query = sprintf('UPDATE `acc_setting` SET `USERNAME` = "%s", `PSWD` = DES_ENCRYPT("%s","%s"), OTHER_SETTING = "%s", EXTRA_CONTENT = "%s", ACTIVE = %s, AUTO_MODE = %d, TAG_LIMIT = %d, TIME_START = "%s", TIME_END = "%s", NUM_PER_DAY = %d, MIN_POST_INTERVAL = %d, QUEUE_SIZE = %d WHERE PK = %d',
+                $query = sprintf('UPDATE `acc_setting` SET `USERNAME` = "%s", `PSWD` = DES_ENCRYPT("%s","%s"), OTHER_SETTING = "%s", EXTRA_CONTENT = "%s", ACTIVE = %s, AUTO_MODE = %d, TIME_START = "%s", TIME_END = "%s", NUM_PER_DAY = %d, MIN_POST_INTERVAL = %d, QUEUE_SIZE = %d WHERE PK = %d',
                     $this->USERNAME,
                     $this->PSWD,
                     DB_KEY,
@@ -153,7 +150,6 @@ class AccSetting
                     mysql_real_escape_string($this->EXTRA_CONTENT),
                     $this->ACTIVE?'True':'False',
                     $this->AUTO_MODE,
-                    $this->TAG_LIMIT,
                     $this->TIME_START,
                     $this->TIME_END,
                     $this->NUM_PER_DAY,
@@ -162,13 +158,12 @@ class AccSetting
                     $this->PK);
                 mysql_query($query, $GLOBALS['DB']);
             } else {
-                $query = sprintf('UPDATE `acc_setting` SET `USERNAME` = "%s", OTHER_SETTING = "%s", EXTRA_CONTENT = "%s", ACTIVE = %s, AUTO_MODE = %d, TAG_LIMIT = %d, TIME_START = "%s", TIME_END = "%s", NUM_PER_DAY = %d, MIN_POST_INTERVAL = %d, QUEUE_SIZE = %d WHERE PK = %d',
+                $query = sprintf('UPDATE `acc_setting` SET `USERNAME` = "%s", OTHER_SETTING = "%s", EXTRA_CONTENT = "%s", ACTIVE = %s, AUTO_MODE = %d, TIME_START = "%s", TIME_END = "%s", NUM_PER_DAY = %d, MIN_POST_INTERVAL = %d, QUEUE_SIZE = %d WHERE PK = %d',
                     $this->USERNAME,
                     mysql_real_escape_string($this->OTHER_SETTING),
                     mysql_real_escape_string($this->EXTRA_CONTENT),
                     $this->ACTIVE?'True':'False',
                     $this->AUTO_MODE,
-                    $this->TAG_LIMIT,
                     $this->TIME_START,
                     $this->TIME_END,
                     $this->NUM_PER_DAY,

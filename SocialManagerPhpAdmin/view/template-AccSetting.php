@@ -55,11 +55,6 @@
    </td>
   </tr>
   <tr>
-   <td><label for="TAG_LIMIT">Tag limit</label></td>
-   <td><input type="number" name="TAG_LIMIT" id="TAG_LIMIT"
-    value="<?php echo $accset->TAG_LIMIT;?>"/></td>
-  </tr>
-  <tr>
    <td><label for="TIME_START">Start time</label></td>
    <td><input type="text" name="TIME_START" id="TIME_START"
     value="<?php echo $accset->TIME_START;?>"/></td>
