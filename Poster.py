@@ -12,7 +12,7 @@ debug_mode = True
 timeout = 60
 socket.setdefaulttimeout(timeout)
 
-LOG_FILE_PATH = 'log.txt'
+LOG_FILE_PATH = 'log_poster.txt'
 
 #################
 # Setup logging #

@@ -1,4 +1,3 @@
-import MySQLdb
 import Mydb
 import os
 from datetime import datetime, timedelta
@@ -37,17 +36,31 @@ class RssPost(object):
         cur = Mydb.MydbExec(("INSERT INTO rss_post(ACCOUNT, TITLE, DESCRIPTION, CONTENT, TAG, IMAGE_FILE, IMAGE_LINK, LINK, OTHER_FIELD, SOCIAL_SCORE, CREATE_TIME) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",(self.fields['ACCOUNT'], self.fields['TITLE'].encode('utf-8'), self.fields['DESCRIPTION'].encode('utf-8'), self.fields['CONTENT'].encode('utf-8'), self.fields['TAG'], self.fields['IMAGE_FILE'], self.fields['IMAGE_LINK'], self.fields['LINK'], self.fields['OTHER_FIELD'], self.fields['SOCIAL_SCORE'], self.fields['CREATE_TIME'])))
         return 
 
-    def StaticClear(imagefiledir, cachingtime):
+    def StaticClear(imagefiledir, cachingtime, force_mode=False):
         today = floorbyday(datetime.now())
-        deadline = today - timedelta(days = 7)
-        cur = Mydb.MydbExec(("SELECT IMAGE_FILE FROM rss_post WHERE CREATE_TIME < %s",(deadline)))
-        imglst = cur.fetchall()
-        for imgfl in imglst:
-            if imgfl['IMAGE_FILE'] is None or len(imgfl['IMAGE_FILE'].strip())==0: continue
-            imgflpath = imagefiledir+imgfl['IMAGE_FILE']
-            try: os.remove(imgflpath)
-            except: pass
-        cur = Mydb.MydbExec(("DELETE FROM rss_post WHERE CREATE_TIME < %s",(deadline)))
+        deadline = today - timedelta(days = cachingtime)
+        clear_count = 0
+        if force_mode:
+            cur = Mydb.MydbExec(("SELECT IMAGE_FILE FROM rss_post WHERE CREATE_TIME < %s",(deadline)))
+            imglst = cur.fetchall()
+            clear_count = len(imglst)
+            for imgfl in imglst:
+                if imgfl['IMAGE_FILE'] is None or len(imgfl['IMAGE_FILE'].strip())==0: continue
+                imgflpath = imagefiledir+imgfl['IMAGE_FILE']
+                try: os.remove(imgflpath)
+                except: pass
+            cur = Mydb.MydbExec(("DELETE FROM rss_post WHERE CREATE_TIME < %s",(deadline)))
+        else:
+            cur = Mydb.MydbExec(("SELECT `rss_post`.`IMAGE_FILE` FROM `rss_post` LEFT JOIN `queue` ON `rss_post`.`PK`=`queue`.`RSS_SOURCE_PK` WHERE `queue`.`RSS_SOURCE_PK` IS NULL AND CREATE_TIME < %s",(deadline)))
+            imglst = cur.fetchall()
+            clear_count = len(imglst)
+            for imgfl in imglst:
+                if imgfl['IMAGE_FILE'] is None or len(imgfl['IMAGE_FILE'].strip())==0: continue
+                imgflpath = imagefiledir+imgfl['IMAGE_FILE']
+                try: os.remove(imgflpath)
+                except: pass
+            cur = Mydb.MydbExec(("DELETE rss_post FROM `rss_post` LEFT JOIN `queue` ON `rss_post`.`PK`=`queue`.`RSS_SOURCE_PK` WHERE `queue`.`RSS_SOURCE_PK` IS NULL AND CREATE_TIME < %s",(deadline)))
+        return clear_count
 
     Clear = staticmethod(StaticClear)
     

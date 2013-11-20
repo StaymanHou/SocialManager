@@ -13,7 +13,7 @@ debug_mode = True
 timeout = 10
 socket.setdefaulttimeout(timeout)
 
-LOG_FILE_PATH = 'log.txt'
+LOG_FILE_PATH = 'log_puller.txt'
 
 #################
 # Setup logging #

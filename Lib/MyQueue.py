@@ -36,17 +36,31 @@ class MyQueue(object):
         else:
             self.fields[field] = value
     
-    def StaticClear(imagefiledir, cachingtime):
+    def StaticClear(imagefiledir, cachingtime, force_mode=False):
         today = floorbyday(datetime.now())
-        deadline = today - timedelta(days = 7)
-        cur = Mydb.MydbExec(("SELECT IMAGE_FILE FROM queue WHERE SCHEDULE_TIME != '0000-00-00 00:00:00' AND SCHEDULE_TIME < %s",(deadline)))
-        imglst = cur.fetchall()
-        for imgfl in imglst:
-            if imgfl['IMAGE_FILE'] is None: continue
-            imgflpath = imagefiledir+imgfl['IMAGE_FILE']
-            try: os.remove(imgflpath)
-            except: pass
-        cur = Mydb.MydbExec(("DELETE FROM queue WHERE SCHEDULE_TIME != '0000-00-00 00:00:00' AND SCHEDULE_TIME < %s",(deadline)))
+        deadline = today - timedelta(days = cachingtime)
+        clear_count = 0
+        if force_mode:
+            cur = Mydb.MydbExec(("SELECT IMAGE_FILE FROM queue WHERE SCHEDULE_TIME != '0000-00-00 00:00:00' AND SCHEDULE_TIME < %s",(deadline)))
+            imglst = cur.fetchall()
+            clear_count = len(imglst)
+            for imgfl in imglst:
+                if imgfl['IMAGE_FILE'] is None: continue
+                imgflpath = imagefiledir+imgfl['IMAGE_FILE']
+                try: os.remove(imgflpath)
+                except: pass
+            cur = Mydb.MydbExec(("DELETE FROM queue WHERE SCHEDULE_TIME != '0000-00-00 00:00:00' AND SCHEDULE_TIME < %s",(deadline)))
+        else:
+            cur = Mydb.MydbExec(("SELECT IMAGE_FILE FROM queue WHERE SCHEDULE_TIME < %s AND STATUS != %s",(deadline, STATUS_DICT['Pending'])))
+            imglst = cur.fetchall()
+            clear_count = len(imglst)
+            for imgfl in imglst:
+                if imgfl['IMAGE_FILE'] is None: continue
+                imgflpath = imagefiledir+imgfl['IMAGE_FILE']
+                try: os.remove(imgflpath)
+                except: pass
+            cur = Mydb.MydbExec(("DELETE FROM queue WHERE SCHEDULE_TIME < %s AND STATUS != %s",(deadline, STATUS_DICT['Pending'])))
+        return clear_count
 
     Clear = staticmethod(StaticClear)
     
