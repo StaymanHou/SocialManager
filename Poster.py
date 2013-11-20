@@ -41,7 +41,6 @@ while 1:
     ModLst = Module.GetActiveList()
     MyQueue.Clear(Config['IMAGE_FILE_DIR'], Config['CACHING_TIME'])
     for Acc in AccLst:
-        print 'Poster: Start Checking @%s'%Acc['NAME']
         for Mod in ModLst:
             AccSet = AccSetting.GetByAccAndMod(Acc['PK'], Mod['PK'])
             if (AccSet is None) or (len(AccSet)==0):
@@ -56,7 +55,6 @@ while 1:
                 logging.warning('Fail to load poster module: %s : %s'%(Mod['NAME'], e))
                 continue
             handler.handle(Acc, AccSet, Config['IMAGE_FILE_DIR'])
-        print 'Poster: End Checking @%s'%Acc['NAME']
     sleep(Config['POSTER_ITERATION'])
 
 print 'Exiting Poster'
