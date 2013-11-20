@@ -39,7 +39,6 @@ while 1:
     Config = MainConf.Get()
     AccLst = Account.GetActiveList()
     ModLst = Module.GetActiveList()
-    MyQueue.Clear(Config['IMAGE_FILE_DIR'], Config['CACHING_TIME'])
     for Acc in AccLst:
         for Mod in ModLst:
             AccSet = AccSetting.GetByAccAndMod(Acc['PK'], Mod['PK'])
