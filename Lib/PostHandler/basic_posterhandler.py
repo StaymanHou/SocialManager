@@ -58,7 +58,7 @@ class basicposterhandler(object):
             else:
                 QI['STATUS'] = STATUS_DICT['PostFail']
                 QI.save()
-                logging.info('Poster: @%s #%s | [FAILED] %s'%(Acc['NAME'], self.module_name, (QI['TITLE'])[:16]))
+                logging.warning('Poster: @%s #%s | [FAILED] %s'%(Acc['NAME'], self.module_name, (QI['TITLE'])[:16]))
         return
 
     def auto_mode_handle(self, acc, accset, am):
