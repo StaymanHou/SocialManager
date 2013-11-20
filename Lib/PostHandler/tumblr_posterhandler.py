@@ -12,9 +12,9 @@ from ..MyDict import STATUS_DICT
 
 class handler(basicposterhandler):
 
-  def __init__(self):
-    super(handler, self).__init__()
-    self.module_name = 'tumblr'
+    def __init__(self):
+        super(handler, self).__init__()
+        self.module_name = 'tumblr'
 
     # override
     def auto_mode_handle(self, acc, accset, am):
