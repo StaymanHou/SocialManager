@@ -61,13 +61,10 @@ class basicposterhandler(object):
                 logging.info('Poster: @%s #%s | [FAILED] %s'%(Acc['NAME'], self.module_name, (QI['TITLE'])[:16]))
         return
 
-    def auto_mode_handle(self, acc, am):
-        if am['CODE']==1:
-            return
-        else:
-            pass
+    def auto_mode_handle(self, acc, accset, am):
+        raise Exception('Post_handle is working! Please override auto_mode_handle method to make it "really" working!')
         return
 
     def post_handle(self, accset, queueitem, imgdir):
-        print 'Post_handle is working! Please override this method to make it "really" working!'
+        raise Exception('Post_handle is working! Please override post_handle method to make it "really" working!')
         return 1
