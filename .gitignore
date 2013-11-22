@@ -10,3 +10,6 @@ log.txt
 # Unittest #
 ############
 *test.py
+# keys #
+############
+keys/*

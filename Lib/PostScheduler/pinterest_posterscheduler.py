@@ -4,10 +4,12 @@ from time import sleep
 import urllib
 import requests
 import re
+import logging
 import json
 from ..MyQueue import *
 from ..RssPost import *
 from ..Tags import *
+from ..MyDict import STATUS_DICT
 
 def recfindboard(jsonobj):
     board_dict = {}
@@ -29,7 +31,48 @@ class handler(basicposterhandler):
         self.module_name = 'pinterest'
 
     # override
-    def without_session(self, load_iteration=1):
+    def auto_mode_handle(self, acc, accset, am):
+        if am['CODE']==1:
+            return
+        elif am['CODE']==2:
+            myqueue = MyQueue()
+            myqueue.GetPendingFirst(acc['PK'], am['MODULE'])
+            if myqueue['PK'] is not None: return
+            lastrp = RssPost.GetLatest(acc['PK'], am['MODULE'], require_image=True)
+            if lastrp['PK'] is None: return
+            myqueue['STATUS'] = STATUS_DICT['Pending']
+            myqueue['ACCOUNT'] = acc['PK']
+            myqueue['MODULE'] = am['MODULE']
+            myqueue['TYPE'] = 1
+            myqueue['TITLE'] = lastrp['TITLE']
+            myqueue['CONTENT'] = lastrp['DESCRIPTION']
+            myqueue['TAG'] = lastrp['TAG']
+            myqueue['LINK'] = lastrp['LINK']
+            myqueue['IMAGE_FILE'] = lastrp['IMAGE_FILE']
+            board_name = ''
+            if 'board_name' in accset['OTHER_SETTING']: board_name = accset['OTHER_SETTING']['board_name']
+            maptaglist = Tags.GetMapTagList(lastrp['TAG'])
+            if maptaglist is not None and len(maptaglist)>0:
+                board_name = maptaglist[0]
+            myqueue['OTHER_FIELD'] = {'image_link': lastrp['IMAGE_LINK'],'board_name': board_name}
+            myqueue['RSS_SOURCE_PK'] = lastrp['PK']
+            myqueue.save()
+            return
+        else:
+            pass
+        return
+
+    # override
+    def post_handle(self, accset, queueitem, imgdir, load_iteration=1):
+        try:
+            self.inner_handle(accset, queueitem, imgdir, load_iteration)
+        except Exception, e:
+            logging.warning('post handle error: %s'%str(e))
+            return 0
+        else:
+            return 1
+
+    def inner_handle(self, accset, queueitem, imgdir, load_iteration=1):
         s = requests.Session()
         headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:21.0) Gecko/20100101 Firefox/21.0'}
         # visit login page
@@ -57,16 +100,7 @@ class handler(basicposterhandler):
             raise Exception('unexpected response: %s : %s'%(url, r.status_code))
         logindata = json.loads(r.text)
         username = logindata['resource_response']['data']['username']
-        self.session = {'app_version': app_version, 'username': username, 's': s}
         sleep(load_iteration)
-        self.with_session()
-
-    # override
-    def with_session(self, load_iteration=1):
-        s = self.session['s']
-        app_version = self.session['app_version']
-        username = self.session['username']
-
         # retreive board_id from board_name
         url = '?data='+urllib.quote_plus('{"options":{},"module":{"name":"UserBoards","options":{"username":"'+username+'","secret_board_count":0},"append":false,"errorStrategy":2},"context":{"app_version":"'+app_version+'"}}')
         url += '&source_url='+urllib.quote_plus('/'+username+'/boards/')
@@ -84,18 +118,19 @@ class handler(basicposterhandler):
         board_id = board_dict.values()[0]
         if 'board_name' in accset['OTHER_SETTING'] and accset['OTHER_SETTING']['board_name'] in board_dict:
             board_id = board_dict[accset['OTHER_SETTING']['board_name']]
-        if 'board_name' in self.QI['OTHER_FIELD'] and self.QI['OTHER_FIELD']['board_name'] in board_dict:
-            board_id = board_dict[self.QI['OTHER_FIELD']['board_name']]
+        if 'board_name' in queueitem['OTHER_FIELD'] and queueitem['OTHER_FIELD']['board_name'] in board_dict:
+            board_id = board_dict[queueitem['OTHER_FIELD']['board_name']]
         # pin
         description = ''
-        if self.QI['TITLE'] is not None and len(self.QI['TITLE'].strip())>0: description += addhashtag(self.QI['TITLE'], self.QI['TAG'], mode = 1)+' '
-        link = str(self.QI['LINK'])
+        if queueitem['TITLE'] is not None and len(queueitem['TITLE'].strip())>0: description += addhashtag(queueitem['TITLE'], queueitem['TAG'], mode = 1)+' '
+        # removed according to  the customers request: if queueitem['CONTENT'] is not None and len(queueitem['CONTENT'].strip())>0: description += addhashtag(queueitem['CONTENT'], queueitem['TAG'])+' | '
+        link = str(queueitem['LINK'])
         description += 'More: '+link
-        image_link = self.QI['OTHER_FIELD']['image_link']
+        image_link = queueitem['OTHER_FIELD']['image_link']
         url = 'http://www.pinterest.com/resource/PinResource/create/'
         urlencodedlink = urllib.quote_plus(link)
         payload = {'data':{'options':{'board_id': board_id.encode('ascii','replace'),
-                                      'description': description.encode('ascii', 'ignore').replace('\'','%27'),
+                                      'description': description.replace('\'','%27'),
                                       'link': link,
                                       'image_url': image_link.encode('ascii','replace'),
                                       'method': 'scraped'},
@@ -106,6 +141,6 @@ class handler(basicposterhandler):
         r = s.post(url, data=urllib.urlencode(payload).replace('%22','%5C%22').replace('%27','%22').replace('%2527','%27'), headers=headers)           
         if r.status_code!=200:
             raise Exception('unexpected response: %s : %s'%(url, r.status_code))
-        if not r.text.endswith('"error": null}}'):
-            raise Exception('unexpected response: %s : %s'%(url, r.text.encode('ascii','replace')))
-        self.session['s'] = s
+        if r.text.endswith('"error": null}}'): return
+        raise Exception('unexpected response: %s : %s'%(url, r.text.encode('ascii','replace')))
+
