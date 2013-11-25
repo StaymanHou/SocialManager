@@ -44,7 +44,7 @@ class basicrsshand(object):
         try: r = requests.get(self.rsspost['IMAGE_LINK'])
         except: return
         if r.status_code!=200: return
-        self.rsspost['IMAGE_FILE'] = str(time.time())+'_'+randomString(16)+'.'+self.rsspost['IMAGE_LINK'].split('.')[-1].strip()
+        self.rsspost['IMAGE_FILE'] = str(time.time())+'_'+randomString(16)+'.'+self.rsspost['IMAGE_LINK'].split('?')[0].split('.')[-1].strip()
         with open(specialize_path(self.imgdir+self.rsspost['IMAGE_FILE']), 'wb') as f:
             for chunk in r.iter_content():
                 f.write(chunk)

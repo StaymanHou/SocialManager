@@ -1,8 +1,4 @@
-Mydb_host = 'localhost'
-Mydb_username = 'MyUser'
-Mydb_password = 'ZwV2pZJrVWNG5t3W'
-Mydb_db = 'MyUser_socialmngold'
-Mydb_key = 'W.Q4oj}BiuW<48XuS[@G)|HRX'
+from settings import *
 
 def MydbExec(exetuple):
     import MySQLdb
