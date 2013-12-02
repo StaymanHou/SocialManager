@@ -22,7 +22,7 @@
     value="<?php echo $accset->PSWD;?>"/></td>
   </tr>
   <tr>
-   <td><label for="OTHER_SETTING">Other setting<br/><a href="#" style="border-bottom: 1px dashed #999; display: inline; margin-left: 20px; font-size: 20px;" title="For facebook: please set something like &quot;{&quot;page_name&quot;: &quot;kpopstarzfacebookpage&quot;}&quot;&#013;For google+: please set something like &quot;{&quot;page_path&quot;: &quot;/b/110422726213868653185/&quot;}&quot;&#013;For tumblr: please set something like &quot;{&quot;blog_name&quot;: &quot;kpopstarztumblrblog&quot;,&quot;link_anchor_text&quot;:&quot;Continue Reading&quot;}&quot;&#013;For pinterest: please set something like &quot;{&quot;board_name&quot;: &quot;KpopStarzBoard&quot;}&quot;">&nbsp;?&nbsp;</a></label></td>
+   <td><label for="OTHER_SETTING">Other setting<br/><a href="#" style="border-bottom: 1px dashed #999; display: inline; margin-left: 20px; font-size: 20px;" title="For facebook: please set something like &quot;{&quot;page_name&quot;: &quot;kpopstarzfacebookpage&quot;, &quot;page_path&quot;:&quot;/kpopstarz&quot;, &quot;page_id&quot;:&quot;122361684544935&quot;}&quot;&#013;For google+: please set something like &quot;{&quot;page_path&quot;: &quot;/b/110422726213868653185/&quot;}&quot;&#013;For tumblr: please set something like &quot;{&quot;blog_name&quot;: &quot;kpopstarztumblrblog&quot;,&quot;link_anchor_text&quot;:&quot;Continue Reading&quot;}&quot;&#013;For pinterest: please set something like &quot;{&quot;board_name&quot;: &quot;KpopStarzBoard&quot;}&quot;">&nbsp;?&nbsp;</a></label></td>
    <td><textarea name="OTHER_SETTING" id="OTHER_SETTING"
     cols="60" rows="4"><?php echo $accset->OTHER_SETTING;?></textarea></td>
   </tr>
